@@ -1,0 +1,1316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CATHEDRAL COMMANDER // MK XX</title>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@500;700&family=VT323&family=Nosifer&family=Playfair+Display:wght@700&family=Orbitron:wght@700&display=swap" rel="stylesheet">
+    <style>
+        /* --- CORE VARIABLES --- */
+        :root {
+            --bg-color: #050505;
+            --panel-bg: #0a0a0a;
+            --text-color: #00ff41;
+            --accent-color: #ff0055;
+            --data-color: #00ccff;
+            --grid-beat: #222;
+            --grid-bar: #666;
+            --font-stack: 'Rajdhani', sans-serif;
+            --font-size-base: 13px;
+        }
+
+        * { box-sizing: border-box; user-select: none; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: var(--font-stack);
+            margin: 0;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            font-size: var(--font-size-base);
+            transition: background 0.3s, color 0.3s;
+        }
+
+        /* --- HEADER --- */
+        header {
+            height: 50px;
+            background: var(--panel-bg);
+            border-bottom: 2px solid var(--text-color);
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+            gap: 15px;
+            z-index: 20;
+            flex-shrink: 0;
+            justify-content: space-between;
+            transition: background 0.3s, border 0.3s;
+        }
+
+        h1 { 
+            margin: 0; font-size: calc(var(--font-size-base) * 1.4); letter-spacing: 3px; 
+            color: var(--accent-color); font-weight: 700; white-space: nowrap; 
+            text-transform: uppercase;
+        }
+
+        .header-left, .header-right { display: flex; align-items: center; gap: 10px; }
+
+        /* CONTROLS */
+        select, button, input[type=number] {
+            background: #000; color: var(--text-color); border: 1px solid #333;
+            padding: 4px 8px; font-family: var(--font-stack); font-size: var(--font-size-base);
+            text-transform: uppercase; cursor: pointer; letter-spacing: 1px;
+            outline: none;
+        }
+        button:hover, select:hover { background: #222; border-color: var(--text-color); }
+        button.active { background: var(--text-color); color: #000; font-weight: bold; box-shadow: 0 0 10px var(--text-color); }
+        button.icon-btn { font-size: calc(var(--font-size-base) * 1.2); padding: 2px 8px; }
+
+        .control-group {
+            display: flex; flex-direction: column; justify-content: center;
+            border-right: 1px solid #333; padding-right: 15px; height: 36px;
+        }
+        .control-group.no-border { border: none; }
+
+        /* SLIDERS */
+        .range-wrap { display: flex; flex-direction: column; gap: 2px; }
+        .range-wrap label { font-size: calc(var(--font-size-base) * 0.7); color: #666; letter-spacing: 1px; }
+        input[type=range] {
+            width: 100px; height: 4px; background: #333; appearance: none; cursor: pointer;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            appearance: none; width: 10px; height: 10px; background: var(--text-color);
+        }
+
+        /* --- SETTINGS PANEL --- */
+        #settings-panel {
+            position: absolute; top: 50px; left: 0; width: 100%;
+            background: var(--panel-bg); border-bottom: 2px solid var(--text-color);
+            padding: 15px; display: none; z-index: 19;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.8);
+        }
+        #settings-panel.open { display: grid; }
+        
+        .setting-col { display: flex; flex-direction: column; gap: 8px; }
+        .setting-col h3 { margin: 0 0 5px 0; font-size: var(--font-size-base); color: var(--accent-color); border-bottom: 1px solid #333; padding-bottom: 2px;}
+        .setting-row { display: flex; justify-content: space-between; align-items: center; }
+        .setting-row label { font-size: calc(var(--font-size-base) * 0.9); color: #aaa; }
+        
+        .sig-inputs { display: flex; gap: 5px; align-items: center; }
+        .sig-inputs input { width: 40px; text-align: center; }
+
+        /* --- WORKSPACE LAYOUT --- */
+        .workspace {
+            display: flex; flex-grow: 1; height: calc(100vh - 50px); position: relative;
+            overflow: hidden;
+            /* Default: Sidebar on Right */
+            flex-direction: row; 
+        }
+        .workspace.sidebar-bottom { flex-direction: column; }
+
+        /* VISUALIZER WRAPPER */
+        .vis-wrapper {
+            flex-grow: 1; position: relative; display: flex; 
+            overflow: hidden; background: #000;
+            flex-direction: column; /* Default Vertical */
+        }
+        
+        /* Directional Layouts */
+        .workspace.dir-down .vis-wrapper { flex-direction: column; }
+        .workspace.dir-up .vis-wrapper { flex-direction: column-reverse; }
+        .workspace.dir-right .vis-wrapper { flex-direction: row; }
+        .workspace.dir-left .vis-wrapper { flex-direction: row-reverse; }
+
+        /* PIANO ROLL */
+        #piano-roll-header {
+            background: var(--panel-bg); flex-shrink: 0; display: none; 
+            border-style: solid; border-color: #333; border-width: 0;
+        }
+        #piano-roll-header.visible { display: block; }
+
+        .workspace.dir-down #piano-roll-header { width: 100%; height: 30px; border-bottom-width: 1px; }
+        .workspace.dir-up #piano-roll-header { width: 100%; height: 30px; border-top-width: 1px; }
+        .workspace.dir-right #piano-roll-header { width: 40px; height: 100%; border-right-width: 1px; }
+        .workspace.dir-left #piano-roll-header { width: 40px; height: 100%; border-left-width: 1px; }
+
+        /* CANVAS */
+        #visualizer-container { flex-grow: 1; position: relative; }
+        canvas { display: block; width: 100%; height: 100%; image-rendering: pixelated; }
+
+        /* --- SIDEBAR (CC) --- */
+        #sidebar {
+            background: var(--panel-bg); border-color: var(--text-color); border-style: solid; border-width: 0;
+            display: none; flex-direction: column; flex-shrink: 0; z-index: 15; position: relative;
+        }
+        #sidebar.visible { display: flex; }
+        
+        .workspace:not(.sidebar-bottom) #sidebar { width: 300px; border-left-width: 2px; }
+        .workspace.sidebar-bottom #sidebar { height: 200px; width: 100%; border-top-width: 2px; }
+        
+        .resizer { position: absolute; z-index: 20; background: rgba(255,255,255,0.05); }
+        .resizer:hover { background: var(--accent-color); }
+        
+        .workspace:not(.sidebar-bottom) .resizer { width: 5px; cursor: col-resize; left: 0; top: 0; bottom: 0; }
+        .workspace.sidebar-bottom .resizer { height: 5px; cursor: row-resize; top: 0; left: 0; right: 0; }
+
+        .sidebar-header {
+            padding: 8px; background: rgba(0,0,0,0.2); font-weight: 700; 
+            border-bottom: 1px solid #333; letter-spacing: 1px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+
+        .sidebar-content {
+            flex-grow: 1; overflow-y: auto; padding: 5px;
+            display: flex; flex-direction: column; gap: 4px;
+        }
+        
+        /* CC WIDGETS */
+        .cc-widget {
+            background: rgba(0,0,0,0.3); border: 1px solid #333; padding: 0 5px;
+            display: flex; align-items: center; height: 40px; gap: 8px;
+            animation: flashCC 0.1s ease-out;
+            cursor: pointer; /* Click to rename */
+        }
+        @keyframes flashCC { from { background: #222; } to { background: rgba(0,0,0,0.3); } }
+        
+        .cc-meta { width: 70px; display: flex; flex-direction: column; gap: 2px; pointer-events: none; }
+        .cc-label { font-size: calc(var(--font-size-base) * 0.7); color: #666; }
+        .cc-name { font-size: calc(var(--font-size-base) * 0.8); font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .cc-val-big { font-size: calc(var(--font-size-base) * 1.1); color: var(--data-color); font-weight: 700; font-family: monospace;}
+        .cc-graph-container { flex-grow: 1; height: 30px; background: #000; border: 1px solid #222; position: relative; }
+        .cc-bg-label { 
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+            font-size: 20px; color: rgba(255,255,255,0.1); font-weight: 900; pointer-events: none; 
+            white-space: nowrap;
+        }
+
+        /* CHANNEL MATRIX */
+        .ch-matrix { display: grid; grid-template-columns: repeat(16, 1fr); gap: 1px; width: 200px; display: none; } 
+        .ch-matrix.visible { display: grid; }
+        .ch-led {
+            height: 10px; background: #111; border: 1px solid #333;
+            font-size: 7px; display: flex; align-items: center; justify-content: center; color: #444;
+            transition: background 0.1s, box-shadow 0.1s;
+        }
+
+        /* STATUS & BPM */
+        #status-box { display: flex; align-items: center; gap: 10px; border: 1px solid #333; padding: 0 10px; height: 30px; }
+        #transport-val { font-weight: bold; color: #555; width: 40px; text-align: center; font-size: calc(var(--font-size-base) * 0.9); }
+        #bpm-box { display: flex; align-items: center; gap: 5px; }
+        #bpm-val { color: var(--accent-color); font-weight: bold; font-size: calc(var(--font-size-base) * 1.2); width: 50px; text-align:right;}
+        .bpm-label { font-size: calc(var(--font-size-base) * 0.7); color: #666; }
+        #clock-dot { width: 6px; height: 6px; background: #333; border-radius: 50%; }
+        #clock-dot.beat { background: var(--text-color); box-shadow: 0 0 8px var(--text-color); }
+
+        /* CRT SCANLINES */
+        .crt-scanlines {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to bottom, rgba(0,0,0,0) 50%, rgba(0,0,0,0.1) 50%);
+            background-size: 100% 4px; pointer-events: none; z-index: 10;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="header-left">
+        <h1 id="app-title">MK XX</h1>
+        
+        <div class="control-group">
+            <select id="midi-input" style="min-width: 150px;"><option>INIT SYSTEMS...</option></select>
+        </div>
+
+        <div id="status-box">
+            <span id="transport-val">STOP</span>
+            <div style="width:1px; height:15px; background:#333"></div>
+            <div id="bpm-box">
+                <div id="clock-dot"></div>
+                <span id="bpm-val">NO CLOCK</span>
+                <span class="bpm-label">BPM</span>
+            </div>
+        </div>
+
+        <button id="btn-toggle-cc" class="icon-btn active">CC</button>
+
+        <div class="ch-matrix visible" id="ch-matrix">
+            <!-- JS GEN -->
+        </div>
+    </div>
+
+    <div class="header-right">
+        <!-- QUICK CONTROLS -->
+        <div class="range-wrap">
+            <label>ZOOM</label>
+            <input type="range" id="zoom-slider" min="1" max="8" step="0.1" value="1">
+        </div>
+        <div class="range-wrap">
+            <label>POS</label>
+            <input type="range" id="pan-slider" min="0" max="100" step="1" value="30">
+        </div>
+        
+        <button id="btn-settings" class="icon-btn">[ * ]</button>
+    </div>
+</header>
+
+<!-- SETTINGS PANEL -->
+<div id="settings-panel">
+    <div class="setting-col">
+        <h3>SYSTEM CONTROL</h3>
+        <div class="setting-row">
+            <button id="btn-manual-init" style="width: 100%; color: var(--accent-color);">[ MANUAL INIT MIDI ]</button>
+        </div>
+        <h3>AVIONICS</h3>
+        <div class="setting-row"><label>FLOW DIRECTION</label>
+            <select id="sel-direction">
+                <option value="down">DOWN (WATERFALL)</option>
+                <option value="up">UP (RISING)</option>
+                <option value="right">RIGHT (TIMELINE)</option>
+                <option value="left">LEFT (REWIND)</option>
+            </select>
+        </div>
+        <div class="setting-row"><label>CC PANEL POS</label>
+            <select id="sel-sidebar-pos">
+                <option value="right">RIGHT SIDE</option>
+                <option value="bottom">BOTTOM</option>
+            </select>
+        </div>
+        <div class="setting-row"><label>SHOW CC PANEL</label><input type="checkbox" id="chk-cc-panel" checked></div>
+        <div class="setting-row"><label>SHOW BPM</label><input type="checkbox" id="chk-bpm" checked></div>
+        <div class="setting-row"><label>SHOW CH MATRIX</label><input type="checkbox" id="chk-matrix" checked></div>
+        <div class="setting-row"><label>SHOW NOTE LABELS</label><input type="checkbox" id="chk-labels"></div>
+    </div>
+    
+    <div class="setting-col">
+        <h3>IMMERSION</h3>
+        <div class="setting-row">
+            <label>THEME</label>
+            <select id="sel-theme">
+                <option value="matrix">MATRIX (STD)</option>
+                <option value="crave">CRAVE (ORANGE)</option>
+                <option value="masseffect">MASS EFFECT N7</option>
+                <option value="synthwave">SYNTHWAVE</option>
+                <option value="neon">NEON NIGHTS</option>
+                <option value="chernobyl">CHERNOBYL (RAD)</option>
+                <option value="mono">MONOCHROME</option>
+                <option value="warhammer">WARHAMMER 40K</option>
+                <option value="helldiver">HELLDIVERS 2</option>
+                <option value="elektron">ELEKTRON</option>
+                <option value="oxi">OXI INSTRUMENTS</option>
+                <option value="sanctuary">SANCTUARY (DIABLO)</option>
+                <option value="kerbal">KERBAL SPACE PROGRAM</option>
+                <option value="accordion">ACCORDION</option>
+                <option value="neve">NEVE CONSOLE</option>
+            </select>
+        </div>
+        <div class="setting-row">
+            <label>NOTE COLOR</label>
+            <select id="sel-color-mode">
+                <option value="channel">CHANNEL</option>
+                <option value="octave">OCTAVE ZONE</option>
+                <option value="root">ROOT NOTE</option>
+            </select>
+        </div>
+        <div class="setting-row">
+            <label>GLOW ON</label>
+            <input type="checkbox" id="chk-glow">
+        </div>
+        <div class="setting-row">
+            <label>GLOW AMOUNT</label>
+            <input type="range" id="glow-slider" min="0" max="50" value="15">
+        </div>
+        <div class="setting-row">
+            <label>PERSISTENCE (TRAILS)</label>
+            <input type="range" id="persist-slider" min="0" max="0.5" step="0.01" value="0">
+        </div>
+        <div class="setting-row">
+            <label>NOTE THICKNESS</label>
+            <input type="range" id="thick-slider" min="1" max="100" value="100">
+        </div>
+        <div class="setting-row">
+            <label>FONT</label>
+            <select id="sel-font">
+                <option value="elegant">IMPERIAL (PLAYFAIR)</option>
+                <option value="tech">DIN / TECH</option>
+                <option value="hacker">TERMINAL</option>
+                <option value="gory">GORY (NOSIFER)</option>
+                <option value="scifi">SCI-FI (ORBITRON)</option>
+                <option value="system">SYSTEM</option>
+            </select>
+        </div>
+        <div class="setting-row">
+            <label>FONT SIZE</label>
+            <input type="range" id="font-size-slider" min="10" max="32" value="13">
+        </div>
+    </div>
+
+    <div class="setting-col">
+        <h3>FLIGHT DATA</h3>
+        <div class="setting-row">
+            <label>TIME SIG (N/D)</label>
+            <div class="sig-inputs">
+                <input type="number" id="sig-num" value="4" min="1" max="32">
+                <span>/</span>
+                <input type="number" id="sig-den" value="4" min="1" max="32">
+            </div>
+        </div>
+        <div class="setting-row">
+            <label>BAR LINE THICK</label>
+            <input type="range" id="grid-thick" min="1" max="8" value="2">
+        </div>
+        <div class="setting-row">
+            <label>NOTE SPEED</label>
+            <input type="range" id="speed-slider" min="1" max="10" value="4">
+        </div>
+        <div class="setting-row">
+            <label>CC TIMEOUT</label>
+            <select id="sel-cc-timeout">
+                <option value="0">NEVER</option>
+                <option value="2000">2 SEC</option>
+                <option value="5000">5 SEC</option>
+                <option value="10000">10 SEC</option>
+                <option value="60000">60 SEC</option>
+            </select>
+        </div>
+        <div class="setting-row"><label>SHOW PIANO KEYS</label><input type="checkbox" id="chk-piano" checked></div>
+        <div class="setting-row"><label>SHOW NOTE LANES</label><input type="checkbox" id="chk-grid" checked></div>
+        <div class="setting-row"><label>SHOW BAR LINES</label><input type="checkbox" id="chk-bar" checked></div>
+        <div class="setting-row"><label>SHOW C-LINES</label><input type="checkbox" id="chk-clines"></div>
+    </div>
+</div>
+
+<div class="workspace dir-down" id="main-workspace">
+    
+    <div class="vis-wrapper" id="vis-wrapper">
+        <div id="piano-roll-header" class="visible">
+            <canvas id="pianoCanvas"></canvas>
+        </div>
+        <div id="visualizer-container">
+            <div class="crt-scanlines"></div>
+            <canvas id="mainCanvas"></canvas>
+        </div>
+    </div>
+
+    <div id="sidebar" class="visible">
+        <div class="resizer" id="drag-handle"></div>
+        <div class="sidebar-header">
+            <span>CC FLIGHT RECORDER</span>
+            <button class="icon-btn" onclick="clearCC()">CLR</button>
+        </div>
+        <div class="sidebar-content" id="cc-container">
+            <div style="text-align:center; color:var(--text-color); opacity:0.5; font-size:10px; padding-top:20px;">NO SIGNAL</div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    /**
+     * CATHEDRAL COMMANDER MK XX
+     * "VIENNA VANGUARD" EDITION
+     */
+
+    // --- THEME ENGINE ---
+    const THEMES = {
+        matrix: { bg:'#050505', panel:'#0a0a0a', text:'#00ff41', accent:'#ff0055', data:'#00ccff', grid:'#222', bar:'#666', ch:['#FF0055','#00FF41','#00CCFF','#FFCC00','#9900FF','#FF6600','#00FFCC','#FF3399','#EEE','#888','#B71C1C','#1B5E20','#33691E','#3E2723','#01579B','#4A148C']},
+        crave: { bg:'#1a1a1a', panel:'#222', text:'#F57F17', accent:'#FFCC00', data:'#888', grid:'#333', bar:'#F57F17', ch:['#F57F17','#d1d1d1','#FFCC00','#a0a0a0','#F57F17','#d1d1d1','#FFCC00','#a0a0a0','#F57F17','#d1d1d1','#FFCC00','#a0a0a0','#F57F17','#d1d1d1','#FFCC00','#a0a0a0']},
+        masseffect: { bg:'#0b1624', panel:'#131b29', text:'#4DB2FF', accent:'#D9531E', data:'#fff', grid:'#1c2b3d', bar:'#D9531E', ch:['#D9531E','#4DB2FF','#ffffff','#888888','#D9531E','#4DB2FF','#ffffff','#888888','#D9531E','#4DB2FF','#ffffff','#888888','#D9531E','#4DB2FF','#ffffff','#888888']},
+        synthwave: { bg:'#12001f', panel:'#1e0033', text:'#00f2ff', accent:'#ff0099', data:'#bd00ff', grid:'#36005c', bar:'#ff0099', ch:['#ff0099','#00f2ff','#bd00ff','#faff00','#ff0099','#00f2ff','#bd00ff','#faff00','#ff0099','#00f2ff','#bd00ff','#faff00','#ff0099','#00f2ff','#bd00ff','#faff00']},
+        neon: { bg:'#000', panel:'#000', text:'#0f0', accent:'#f0f', data:'#0ff', grid:'#333', bar:'#fff', ch:['#f00','#0f0','#00f','#ff0','#0ff','#f0f','#fff','#aaa','#f00','#0f0','#00f','#ff0','#0ff','#f0f','#fff','#aaa']},
+        mono: { bg:'#000', panel:'#000', text:'#fff', accent:'#fff', data:'#fff', grid:'#333', bar:'#fff', ch:['#fff','#fff','#fff','#fff','#fff','#fff','#fff','#fff','#fff','#fff','#fff','#fff','#fff','#fff','#fff','#fff']},
+        warhammer: { bg:'#0b0500', panel:'#1a0f00', text:'#d4af37', accent:'#8a0000', data:'#7a7a7a', grid:'#2b1d0e', bar:'#8a0000', ch:['#8a0000','#d4af37','#5e5e5e','#ffffff','#8a0000','#d4af37','#5e5e5e','#ffffff','#8a0000','#d4af37','#5e5e5e','#ffffff','#8a0000','#d4af37','#5e5e5e','#ffffff']},
+        helldiver: { bg:'#111', panel:'#1a1a1a', text:'#ffe600', accent:'#fff', data:'#aaa', grid:'#333', bar:'#ffe600', ch:['#ffe600','#000','#fff','#ffe600','#333','#fff','#ffe600','#333','#fff','#ffe600','#333','#fff','#ffe600','#333','#fff','#ffe600']},
+        elektron: { bg:'#222', panel:'#333', text:'#ff6600', accent:'#ff3333', data:'#aaa', grid:'#444', bar:'#ff6600', ch:['#ff3333','#ff6600','#ffffff','#888','#ff3333','#ff6600','#ffffff','#888','#ff3333','#ff6600','#ffffff','#888','#ff3333','#ff6600','#ffffff','#888']},
+        oxi: { bg:'#000', panel:'#111', text:'#fff', accent:'#00ffcc', data:'#ff00ff', grid:'#222', bar:'#fff', ch:['#ff99cc','#99ccff','#99ffcc','#ffff99','#cc99ff','#ffcc99','#fff','#888','#ff99cc','#99ccff','#99ffcc','#ffff99','#cc99ff','#ffcc99','#fff','#888']},
+        lsd: { bg:'#000', panel:'#100020', text:'#00ff00', accent:'#ff00ff', data:'#00ffff', grid:'#222', bar:'#fff', ch:['#f00','#ff8000','#ff0','#80ff00','#0f0','#00ff80','#0ff','#0080ff','#00f','#8000ff','#f0f','#ff0080','#fff','#888','#444','#000']},
+        sanctuary: { bg:'#050000', panel:'#1a0000', text:'#c20000', accent:'#ffcc00', data:'#590000', grid:'#220000', bar:'#8a0000', ch:['#8a0000','#ff2200','#ffcc00','#440000','#8a0000','#ff2200','#ffcc00','#440000','#8a0000','#ff2200','#ffcc00','#440000','#8a0000','#ff2200','#ffcc00','#440000']},
+        kerbal: { bg:'#222', panel:'#333', text:'#BADA55', accent:'#fff', data:'#888', grid:'#444', bar:'#BADA55', ch:['#BADA55','#fff','#888','#BADA55','#fff','#888','#BADA55','#fff','#888','#BADA55','#fff','#888','#BADA55','#fff','#888','#BADA55']},
+        chernobyl: { bg:'#000000', panel:'#050505', text:'#00ffff', accent:'#0099ff', data:'#0055ff', grid:'#111', bar:'#00ffff', ch:['#0ff','#00ccff','#0099ff','#0066ff','#fff','#aaa','#0ff','#00ccff','#0099ff','#0066ff','#fff','#aaa','#0ff','#00ccff','#0099ff','#0066ff']},
+        accordion: { bg:'#1a1510', panel:'#2b231a', text:'#e6dcc8', accent:'#8c2626', data:'#111', grid:'#3e3226', bar:'#e6dcc8', ch:['#e6dcc8','#111','#8c2626','#3e3226','#e6dcc8','#111','#8c2626','#3e3226','#e6dcc8','#111','#8c2626','#3e3226','#e6dcc8','#111','#8c2626','#3e3226']},
+        neve: { bg:'#2a2f35', panel:'#353b42', text:'#aab2bd', accent:'#bf2e2e', data:'#2e5280', grid:'#444b54', bar:'#bf2e2e', ch:['#2e5280','#bf2e2e','#aab2bd','#2a2f35','#2e5280','#bf2e2e','#aab2bd','#2a2f35','#2e5280','#bf2e2e','#aab2bd','#2a2f35','#2e5280','#bf2e2e','#aab2bd','#2a2f35']}
+    };
+
+    const CONFIG = {
+        NOTE_NAMES: ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"],
+        BLACK_KEYS: [1, 3, 6, 8, 10],
+        PPQN: 24
+    };
+
+    // --- STATE ---
+    let midiAccess = null;
+    let selectedInputId = null;
+    
+    // Settings
+    let currentTheme = 'matrix';
+    let noteSpeed = 4;
+    let zoomLevel = 1;
+    let panPercent = 30;
+    let colorMode = 'channel'; 
+    let ccTimeout = 0;
+    let showLabels = false;
+    let showGrid = true;
+    let showBarLines = true;
+    let showPiano = true;
+    let showCLines = false;
+    let glowEnabled = false;
+    let glowAmount = 15;
+    let direction = 'down';
+    let persistence = 0;
+    let noteThickness = 100; // Percent
+    
+    // Advanced Time Sig
+    let sigNum = 4;
+    let sigDen = 4;
+    let barThickness = 2;
+    
+    // Font Scale
+    let fontScale = 13;
+
+    // Data
+    const activeNotes = new Map();
+    const fallingObjects = []; 
+    const ccMonitors = new Map();
+    const chIndicators = [];
+    
+    // Clock
+    let clockTicks = 0;
+    let lastClockTime = 0;
+    let tickHistory = []; 
+    let lastActiveClock = 0;
+    let ticksPerBar = 96;
+    let barTickCounter = 0; 
+
+    // --- DOM ---
+    const mainCanvas = document.getElementById('mainCanvas');
+    const pianoCanvas = document.getElementById('pianoCanvas');
+    const mainCtx = mainCanvas.getContext('2d', { alpha: true }); // Alpha true for trails
+    const pianoCtx = pianoCanvas.getContext('2d', { alpha: false });
+    const chContainer = document.getElementById('ch-matrix');
+
+    // --- INIT ---
+    function init() {
+        setupChannelMatrix();
+        setupEventListeners();
+        applyTheme('matrix');
+        updateTimeSig(); 
+        resize();
+        window.addEventListener('resize', resize);
+        initMIDI();
+        
+        setInterval(cleanupCCs, 1000);
+        requestAnimationFrame(loop);
+    }
+
+    function setupChannelMatrix() {
+        for(let i=0; i<16; i++) {
+            const d = document.createElement('div');
+            d.className = 'ch-led';
+            d.textContent = i+1;
+            chContainer.appendChild(d);
+            chIndicators.push(d);
+        }
+    }
+
+    function applyTheme(key) {
+        currentTheme = key;
+        const t = THEMES[key];
+        const r = document.documentElement.style;
+        r.setProperty('--bg-color', t.bg);
+        r.setProperty('--panel-bg', t.panel);
+        r.setProperty('--text-color', t.text);
+        r.setProperty('--accent-color', t.accent);
+        r.setProperty('--data-color', t.data);
+        r.setProperty('--grid-beat', t.grid);
+        r.setProperty('--grid-bar', t.bar);
+        document.getElementById('app-title').innerText = `MK XX // ${key.toUpperCase()}`;
+    }
+
+    function cleanupCCs() {
+        if (ccTimeout === 0) return;
+        const now = Date.now();
+        ccMonitors.forEach((mon, id) => {
+            if (now - mon.lastUpdate > ccTimeout) {
+                mon.element.remove();
+                ccMonitors.delete(id);
+            }
+        });
+        if (ccMonitors.size === 0 && document.getElementById('cc-container').children.length === 0) {
+             document.getElementById('cc-container').innerHTML = '<div style="text-align:center; color:var(--text-color); opacity:0.5; font-size:10px; padding-top:20px;">NO SIGNAL</div>';
+        }
+    }
+
+    function setupEventListeners() {
+        const safeGet = (id) => document.getElementById(id);
+        const safeListen = (id, evt, fn) => {
+            const el = safeGet(id);
+            if(el) el.addEventListener(evt, fn);
+        };
+
+        safeListen('zoom-slider', 'input', e => zoomLevel = parseFloat(e.target.value));
+        safeListen('pan-slider', 'input', e => panPercent = parseFloat(e.target.value));
+        
+        // Toggle Note Labels
+        safeListen('btn-settings', 'click', e => {
+            const p = document.getElementById('settings-panel');
+            if(p) p.classList.toggle('open');
+            e.target.classList.toggle('active');
+        });
+        
+        safeListen('btn-manual-init', 'click', initMIDI);
+        
+        // Main Header Toggle CC Button
+        safeListen('btn-toggle-cc', 'click', e => {
+            const chk = document.getElementById('chk-cc-panel');
+            chk.checked = !chk.checked;
+            chk.dispatchEvent(new Event('change'));
+            e.target.classList.toggle('active');
+        });
+
+        // Toggles
+        const toggle = (id, action) => safeListen(id, 'change', e => action(e.target.checked));
+        toggle('chk-bpm', v => document.getElementById('bpm-box').style.display = v ? 'flex' : 'none');
+        toggle('chk-matrix', v => document.getElementById('ch-matrix').classList.toggle('visible', v));
+        toggle('chk-piano', v => { showPiano = v; document.getElementById('piano-roll-header').classList.toggle('visible', v); resize(); });
+        toggle('chk-grid', v => showGrid = v);
+        toggle('chk-bar', v => showBarLines = v);
+        toggle('chk-labels', v => { 
+            showLabels = v; 
+            // Sync button
+            const btn = document.getElementById('btn-labels');
+            if(btn) if(v) btn.classList.add('active'); else btn.classList.remove('active');
+        });
+        toggle('chk-clines', v => showCLines = v);
+        
+        toggle('chk-cc-panel', v => {
+            document.getElementById('sidebar').classList.toggle('visible', v);
+            const btn = document.getElementById('btn-toggle-cc');
+            if(v) btn.classList.add('active'); else btn.classList.remove('active');
+            resize();
+        });
+        
+        safeListen('sel-sidebar-pos', 'change', e => {
+            const ws = document.getElementById('main-workspace');
+            if (e.target.value === 'bottom') ws.classList.add('sidebar-bottom');
+            else ws.classList.remove('sidebar-bottom');
+            resize();
+        });
+
+        safeListen('sel-direction', 'change', e => {
+            direction = e.target.value;
+            const ws = document.getElementById('main-workspace');
+            ws.className = 'workspace'; 
+            ws.classList.add(`dir-${direction}`);
+            if (document.getElementById('sel-sidebar-pos').value === 'bottom') ws.classList.add('sidebar-bottom');
+            fallingObjects.length = 0; 
+            resize();
+        });
+
+        safeListen('chk-glow', 'change', e => {
+            if (e.target.checked) glowEnabled = true; else glowEnabled = false;
+        });
+        safeListen('glow-slider', 'input', e => {
+            if (document.getElementById('chk-glow').checked) glowAmount = parseInt(e.target.value);
+        });
+        safeListen('persist-slider', 'input', e => persistence = parseFloat(e.target.value));
+        safeListen('thick-slider', 'input', e => noteThickness = parseInt(e.target.value));
+
+        const sel = (id, action) => safeListen(id, 'change', e => action(e.target.value));
+        sel('sel-theme', applyTheme);
+        sel('sel-color-mode', v => colorMode = v);
+        sel('sel-cc-timeout', v => ccTimeout = parseInt(v));
+        sel('sel-font', updateFont);
+
+        safeListen('speed-slider', 'input', e => noteSpeed = parseInt(e.target.value));
+        safeListen('sig-num', 'input', e => { sigNum = parseInt(e.target.value) || 4; updateTimeSig(); });
+        safeListen('sig-den', 'input', e => { sigDen = parseInt(e.target.value) || 4; updateTimeSig(); });
+        safeListen('grid-thick', 'input', e => barThickness = parseInt(e.target.value));
+        
+        safeListen('font-size-slider', 'input', e => {
+            fontScale = parseInt(e.target.value);
+            document.documentElement.style.setProperty('--font-size-base', fontScale + 'px');
+        });
+
+        const handle = document.getElementById('drag-handle');
+        const sidebar = document.getElementById('sidebar');
+        if(handle && sidebar) {
+            let isResizing = false;
+            handle.addEventListener('mousedown', () => { isResizing = true; document.body.style.cursor = 'col-resize'; });
+            window.addEventListener('mousemove', e => {
+                if(!isResizing) return;
+                if (document.getElementById('main-workspace').classList.contains('sidebar-bottom')) {
+                    sidebar.style.height = (window.innerHeight - e.clientY - 50) + 'px';
+                } else {
+                    sidebar.style.width = (window.innerWidth - e.clientX) + 'px';
+                }
+                resize();
+            });
+            window.addEventListener('mouseup', () => { isResizing = false; document.body.style.cursor = 'default'; });
+        }
+    }
+
+    function updateTimeSig() {
+        ticksPerBar = Math.round((4 / sigDen) * sigNum * CONFIG.PPQN);
+        barTickCounter = 0;
+    }
+
+    function updateFont(val) {
+        const r = document.documentElement.style;
+        if(val==='tech') r.setProperty('--font-stack', "'Rajdhani', sans-serif");
+        else if(val==='hacker') r.setProperty('--font-stack', "'VT323', monospace");
+        else if(val==='gory') r.setProperty('--font-stack', "'Nosifer', cursive");
+        else if(val==='elegant') r.setProperty('--font-stack', "'Playfair Display', serif");
+        else if(val==='scifi') r.setProperty('--font-stack', "'Orbitron', sans-serif");
+        else r.setProperty('--font-stack', "sans-serif");
+    }
+
+    function resize() {
+        const vCont = document.getElementById('visualizer-container');
+        mainCanvas.width = vCont.offsetWidth;
+        mainCanvas.height = vCont.offsetHeight;
+        
+        if (direction === 'down' || direction === 'up') {
+            pianoCanvas.width = vCont.offsetWidth;
+            pianoCanvas.height = 30;
+        } else {
+            pianoCanvas.width = 40;
+            pianoCanvas.height = vCont.offsetHeight;
+        }
+    }
+
+    // --- COLOR ENGINE ---
+    function getNoteColor(note, ch) {
+        if (currentTheme === 'chernobyl') return '#00ffff'; 
+
+        if (colorMode === 'channel') return THEMES[currentTheme].ch[ch];
+        
+        if (colorMode === 'octave') {
+            // DISCRETE OCTAVE COLORS (Hard borders)
+            const octave = Math.floor(note / 12);
+            const PAL = ['#FF0000', '#FF7F00', '#FFFF00', '#00FF00', '#0000FF', '#4B0082', '#9400D3', '#FFFFFF', '#FF00FF', '#00FFFF'];
+            return PAL[octave % PAL.length];
+        }
+        
+        if (colorMode === 'root') {
+            const root = note % 12;
+            return THEMES[currentTheme].ch[root];
+        }
+        return '#fff';
+    }
+
+    // --- MIDI ---
+    async function initMIDI() {
+        const sel = document.getElementById('midi-input');
+        if (!navigator.requestMIDIAccess) {
+            sel.innerHTML = '<option>NO BROWSER SUPPORT</option>';
+            return;
+        }
+        try {
+            midiAccess = await navigator.requestMIDIAccess();
+            midiAccess.onstatechange = refreshInputs;
+            refreshInputs();
+        } catch(e){
+            console.error(e);
+            sel.innerHTML = '<option>ACCESS DENIED (RETRY)</option>';
+        }
+    }
+
+    function refreshInputs() {
+        const sel = document.getElementById('midi-input');
+        sel.innerHTML = '';
+        const inputs = Array.from(midiAccess.inputs.values());
+        if(inputs.length===0) sel.innerHTML = '<option>NO DEVICES FOUND</option>';
+        else {
+            const d = document.createElement('option'); d.text = "-- SELECT DEVICE --"; sel.appendChild(d);
+            inputs.forEach(i => {
+                const o = document.createElement('option'); o.value = i.id; o.text = i.name; sel.appendChild(o);
+            });
+        }
+        if(selectedInputId) sel.value = selectedInputId;
+    }
+
+    document.getElementById('midi-input').addEventListener('change', e => {
+        if(selectedInputId && midiAccess.inputs.has(selectedInputId)) 
+            midiAccess.inputs.get(selectedInputId).onmidimessage = null;
+        selectedInputId = e.target.value;
+        const input = midiAccess.inputs.get(selectedInputId);
+        if(input) input.onmidimessage = handleMsg;
+    });
+
+    function handleMsg(msg) {
+        const [status, d1, d2] = msg.data;
+        const cmd = status >> 4;
+        const ch = status & 0xf;
+
+        if (status === 0xF8) { handleClock(); return; } 
+        if (status === 0xFA) { setTransport('PLAY', '#00ff41'); return; }
+        if (status === 0xFB) { setTransport('CONT', '#ffff00'); return; }
+        if (status === 0xFC) { setTransport('STOP', '#ff0055'); resetClock(); return; }
+        
+        if (status >= 0xF8) return; 
+
+        const now = performance.now();
+
+        if (cmd === 9 && d2 > 0) { // Note On
+            const col = getNoteColor(d1, ch);
+            activeNotes.set(`${ch}-${d1}`, {
+                note: d1, ch, vel: d2, start: now,
+                color: col
+            });
+            flashCh(ch, col); 
+        }
+        else if (cmd === 8 || (cmd === 9 && d2 === 0)) { // Note Off
+            const id = `${ch}-${d1}`;
+            if (activeNotes.has(id)) {
+                const n = activeNotes.get(id);
+                const duration = now - n.start;
+                // LENGTH = Speed * Duration / 16.66 (Frame normalized time)
+                const len = noteSpeed * (duration / 16.66); 
+
+                // When dropping, use the EXACT calculated length for visual continuity
+                fallingObjects.push({
+                    type: 'note', note: n.note, 
+                    pos: 0, len: len, 
+                    color: n.color,
+                    timeDropped: now // To sync movement
+                });
+                activeNotes.delete(id);
+            }
+        }
+        else if (cmd === 11) { // CC
+            handleCC(ch, d1, d2);
+            flashCh(ch, null, true); 
+        }
+    }
+
+    function setTransport(txt, color) {
+        const el = document.getElementById('transport-val');
+        el.innerText = txt;
+        el.style.color = color;
+    }
+    
+    function resetClock() {
+        clockTicks = 0; barTickCounter = 0;
+    }
+
+    function flashCh(ch, color, isCC=false) {
+        const el = chIndicators[ch];
+        if(!el) return;
+        
+        if(isCC) {
+            el.style.backgroundColor = 'var(--data-color)';
+            el.style.color = '#000';
+        } else {
+            el.style.backgroundColor = color;
+            el.style.color = '#000';
+            el.style.boxShadow = `0 0 8px ${color}`;
+        }
+        
+        setTimeout(() => {
+            el.style.backgroundColor = '';
+            el.style.color = '';
+            el.style.boxShadow = '';
+        }, 100);
+    }
+
+    function handleClock() {
+        const now = performance.now();
+        lastActiveClock = now;
+        
+        if (clockTicks % 24 === 0) {
+            const dot = document.getElementById('clock-dot');
+            dot.classList.add('beat');
+            setTimeout(() => dot.classList.remove('beat'), 100);
+        }
+
+        if (lastClockTime > 0) {
+            const delta = now - lastClockTime;
+            if (delta > 2 && delta < 200) {
+                tickHistory.push(delta);
+                if(tickHistory.length > 192) tickHistory.shift(); 
+                
+                if(clockTicks % 24 === 0) {
+                    const avgDelta = tickHistory.reduce((a,b)=>a+b,0) / tickHistory.length;
+                    const bpm = 60000 / (avgDelta * 24);
+                    document.getElementById('bpm-val').innerText = bpm.toFixed(1);
+                }
+            }
+        }
+        lastClockTime = now;
+        
+        // GRID LOGIC
+        if (showBarLines && barTickCounter >= ticksPerBar) {
+            fallingObjects.push({ type: 'grid', pos: 0, isBar: true, timeDropped: now });
+            barTickCounter = 0; 
+        }
+        
+        const beatInterval = CONFIG.PPQN; 
+        if (showGrid && clockTicks % beatInterval === 0) {
+            if (barTickCounter !== 0) {
+                fallingObjects.push({ type: 'grid', pos: 0, isBar: false, timeDropped: now });
+            }
+        }
+        
+        clockTicks++;
+        barTickCounter++;
+    }
+
+    function handleCC(ch, cc, val) {
+        const id = `${ch}-${cc}`;
+        let mon = ccMonitors.get(id);
+        const cont = document.getElementById('cc-container');
+        
+        const chColor = THEMES[currentTheme].ch[ch];
+        
+        if (!mon) {
+            if(ccMonitors.size === 0) cont.innerHTML = '';
+            
+            const el = document.createElement('div');
+            el.className = 'cc-widget';
+            el.onclick = () => renameCC(id);
+            el.innerHTML = `
+                <div class="cc-meta">
+                    <span class="cc-label" style="color:${chColor}">CH${ch+1} CC${cc}</span>
+                    <span class="cc-name" id="name-${id}">-</span>
+                </div>
+                <div class="cc-val-big">${val}</div>
+                <div class="cc-graph-container">
+                    <div class="cc-bg-label" id="bg-${id}"></div>
+                    <canvas></canvas>
+                </div>
+            `;
+            cont.insertBefore(el, cont.firstChild);
+            
+            const cvs = el.querySelector('canvas');
+            cvs.width = 100; cvs.height = 30;
+            
+            mon = {
+                val: val, history: new Array(50).fill(0),
+                elVal: el.querySelector('.cc-val-big'),
+                element: el,
+                ctx: cvs.getContext('2d'),
+                w: 100, h: 30,
+                color: chColor,
+                lastUpdate: Date.now()
+            };
+            ccMonitors.set(id, mon);
+            
+            const ro = new ResizeObserver(() => {
+                cvs.width = cvs.offsetWidth; cvs.height = cvs.offsetHeight;
+                mon.w = cvs.width; mon.h = cvs.height;
+            });
+            ro.observe(el.querySelector('.cc-graph-container'));
+        }
+
+        mon.val = val;
+        mon.lastUpdate = Date.now();
+        mon.elVal.innerText = val;
+        mon.history.push(val);
+        mon.history.shift();
+        mon.color = THEMES[currentTheme].ch[ch]; 
+        // Update Label Color
+        mon.element.querySelector('.cc-label').style.color = mon.color;
+        
+        const c = mon.ctx;
+        c.clearRect(0,0,mon.w,mon.h);
+        c.strokeStyle = mon.color;
+        c.lineWidth = 2;
+        c.beginPath();
+        const step = mon.w / 49;
+        mon.history.forEach((v, i) => {
+            const y = mon.h - ((v/127) * mon.h);
+            if(i===0) c.moveTo(0,y); else c.lineTo(i*step, y);
+        });
+        c.stroke();
+    }
+
+    function renameCC(id) {
+        const name = prompt("Rename CC Graph:", "");
+        if (name) {
+            document.getElementById(`name-${id}`).innerText = name;
+            document.getElementById(`bg-${id}`).innerText = name;
+        }
+    }
+
+    window.clearCC = function() {
+        ccMonitors.clear();
+        document.getElementById('cc-container').innerHTML = 
+            '<div style="text-align:center; color:var(--text-color); opacity:0.5; font-size:10px; padding-top:20px;">NO SIGNAL</div>';
+    }
+
+    // --- RENDER ---
+    let lastFrameTime = performance.now();
+    function loop() {
+        requestAnimationFrame(loop);
+        
+        const now = performance.now();
+        const dt = now - lastFrameTime;
+        lastFrameTime = now;
+        
+        // Time sync physics: move distance = noteSpeed * (dt / 16.66)
+        const moveDist = noteSpeed * (dt / 16.66);
+
+        if (now - lastActiveClock > 2000 && lastActiveClock !== 0) {
+            document.getElementById('bpm-val').innerText = "NO CLOCK";
+            lastActiveClock = 0; 
+        }
+
+        const visKeys = 128 / zoomLevel;
+        const maxStart = 128 - visKeys;
+        const startKey = (panPercent / 100) * maxStart;
+        const endKey = startKey + visKeys;
+        const keyW = mainCanvas.width / visKeys;
+        
+        // BG
+        mainCtx.save();
+        // Trails logic
+        if (persistence > 0) {
+            mainCtx.fillStyle = `rgba(0,0,0,${1 - persistence})`;
+            mainCtx.fillRect(0,0,mainCanvas.width, mainCanvas.height);
+        } else {
+            mainCtx.clearRect(0,0,mainCanvas.width, mainCanvas.height);
+            const bg = getComputedStyle(document.body).getPropertyValue('--bg-color');
+            mainCtx.fillStyle = bg;
+            mainCtx.fillRect(0,0,mainCanvas.width, mainCanvas.height);
+        }
+        mainCtx.restore();
+
+        const isVertical = (direction === 'down' || direction === 'up');
+        
+        if (isVertical) {
+            drawVertical(startKey, endKey, visKeys, moveDist, keyW);
+        } else {
+            drawHorizontal(startKey, endKey, visKeys, moveDist, keyW);
+        }
+    }
+
+    function drawVertical(startKey, endKey, visKeys, moveDist, keyW) {
+        // NOTE THICKNESS calculation
+        // Full width is keyW. thickness % determines actual width.
+        // Center the note.
+        const thickW = keyW * (noteThickness / 100);
+        const thickOffset = (keyW - thickW) / 2;
+
+        // PIANO
+        if(showPiano) {
+            pianoCtx.fillStyle = getComputedStyle(document.body).getPropertyValue('--panel-bg');
+            pianoCtx.fillRect(0,0, pianoCanvas.width, pianoCanvas.height);
+            
+            for(let i=Math.floor(startKey); i<endKey; i++) {
+                const x = Math.floor((i-startKey)*keyW);
+                const w = Math.ceil(keyW);
+                const isBlack = CONFIG.BLACK_KEYS.includes(i%12);
+                const noteName = CONFIG.NOTE_NAMES[i%12];
+                
+                pianoCtx.fillStyle = isBlack ? '#222' : '#888';
+                pianoCtx.fillRect(x, isBlack?0:10, w-1, isBlack?18:20);
+                
+                // OCTAVE LABELS on PIANO
+                pianoCtx.fillStyle = isBlack ? '#888' : '#444'; 
+                pianoCtx.font = `bold ${fontScale}px monospace`;
+                
+                if(noteName === "C") {
+                    pianoCtx.fillStyle = '#fff';
+                    const octave = Math.floor(i/12) - 1;
+                    pianoCtx.fillText("C"+octave, x+2, 26);
+                } else if (!isBlack && keyW > 15) {
+                    if(keyW > 12) pianoCtx.fillText(noteName, x+2, 26);
+                }
+            }
+        }
+        
+        // TACTICAL GRID (Background Lines)
+        if (showCLines) {
+            mainCtx.save();
+            mainCtx.lineWidth = 1;
+            mainCtx.strokeStyle = 'rgba(255,255,255,0.1)';
+            mainCtx.font = `bold ${fontScale*1.5}px monospace`;
+            mainCtx.fillStyle = 'rgba(255,255,255,0.1)';
+            for(let i=Math.floor(startKey); i<endKey; i++) {
+                if (i % 12 === 0) { // C note
+                     const x = Math.floor((i-startKey)*keyW);
+                     mainCtx.beginPath();
+                     mainCtx.moveTo(x, 0); mainCtx.lineTo(x, mainCanvas.height);
+                     mainCtx.stroke();
+                     mainCtx.fillText("C" + (Math.floor(i/12)-1), x + 5, mainCanvas.height - 20);
+                }
+            }
+            mainCtx.restore();
+        }
+
+        // FALLING
+        for(let i=fallingObjects.length-1; i>=0; i--) {
+            const o = fallingObjects[i];
+            // Move Physics
+            o.pos += moveDist;
+            
+            // Remove if off screen
+            if(o.pos > mainCanvas.height + o.len) { fallingObjects.splice(i,1); continue; }
+
+            if(o.type === 'grid') {
+                mainCtx.save(); mainCtx.shadowBlur = 0;
+                mainCtx.strokeStyle = o.isBar ? getComputedStyle(document.body).getPropertyValue('--grid-bar') : getComputedStyle(document.body).getPropertyValue('--grid-beat');
+                mainCtx.lineWidth = o.isBar ? barThickness : 1;
+                mainCtx.beginPath();
+                
+                if (direction === 'down') {
+                    mainCtx.moveTo(0, o.pos); mainCtx.lineTo(mainCanvas.width, o.pos);
+                } else { // UP: Moves Up
+                    const y = mainCanvas.height - o.pos;
+                    mainCtx.moveTo(0, y); mainCtx.lineTo(mainCanvas.width, y);
+                }
+                mainCtx.stroke();
+                mainCtx.restore();
+            }
+            else if(o.type === 'note') {
+                if(o.note < startKey || o.note >= endKey) continue;
+                const x = Math.floor((o.note - startKey)*keyW) + thickOffset;
+                
+                mainCtx.save();
+                if(glowEnabled && glowAmount > 0) {
+                    mainCtx.shadowColor = (currentTheme === 'chernobyl') ? '#00FFFF' : o.color;
+                    mainCtx.shadowBlur = glowAmount;
+                }
+                mainCtx.fillStyle = o.color;
+                
+                let ry;
+                if (direction === 'down') {
+                    // Waterfall: Top (0) is Now. Objects fall down.
+                    // Active note is at 0. Falling note starts at 0 (pos) and moves down.
+                    // Wait, previously falling logic was:
+                    // Active: 0 to Len.
+                    // Falling: Starts at Len? No, starts at 0 but moves.
+                    // If I released a note 1 second ago, it moved X pixels.
+                    // Its TOP is at X. Its BOTTOM is at X + Len.
+                    // Correct: ry = o.pos;
+                    // WAIT! Active Note is 0 to Len.
+                    // If I release, it becomes a block of size Len at Pos 0.
+                    // Then it moves. So yes, ry = o.pos.
+                    // BUT, Active note grows downwards. 
+                    // Start time = T0. Now = T1. Length = (T1-T0)*S.
+                    // Draw 0 to Length.
+                    // Release at T1. falling object created with pos=0?
+                    // No, if it falls, the "Newest" part is at 0.
+                    // The "Oldest" part is at Length.
+                    // So if it falls, the top (Newest) is at o.pos.
+                    // Correct.
+                    ry = o.pos; 
+                } else { // UP
+                    // Now is Bottom (H). Objects move Up.
+                    // Active note grows Up from H.
+                    // Falling note bottom edge is at H - o.pos.
+                    // Top edge is at H - o.pos - o.len.
+                    ry = mainCanvas.height - o.pos - o.len;
+                }
+                
+                mainCtx.fillRect(x, ry, Math.ceil(thickW), o.len);
+                mainCtx.restore();
+                
+                if(showLabels && keyW > 20) {
+                    mainCtx.save(); mainCtx.shadowBlur=0; mainCtx.fillStyle='#000'; 
+                    mainCtx.font=`bold ${fontScale}px monospace`;
+                    mainCtx.fillText(CONFIG.NOTE_NAMES[o.note%12], x+2, ry + 15);
+                    mainCtx.restore();
+                }
+            }
+        }
+
+        // ACTIVE
+        activeNotes.forEach(n => {
+            if(n.note < startKey || n.note >= endKey) return;
+            const x = Math.floor((n.note - startKey)*keyW) + thickOffset;
+            const duration = performance.now() - n.start;
+            const len = noteSpeed * (duration / 16.66);
+            
+            mainCtx.save();
+            if(glowEnabled && glowAmount > 0) {
+                mainCtx.shadowColor = (currentTheme === 'chernobyl') ? '#00FFFF' : n.color;
+                mainCtx.shadowBlur = glowAmount;
+            }
+            mainCtx.fillStyle = n.color;
+            
+            let ry;
+            if (direction === 'down') {
+                ry = 0;
+            } else { // UP
+                ry = mainCanvas.height - len;
+            }
+            
+            mainCtx.fillRect(x, ry, Math.ceil(thickW), len);
+            mainCtx.restore();
+            
+            if(showLabels && keyW > 20) {
+                mainCtx.save(); mainCtx.shadowBlur=0; mainCtx.fillStyle='#000'; 
+                mainCtx.font=`bold ${fontScale}px monospace`;
+                // Draw label inside the growing bar
+                mainCtx.fillText(CONFIG.NOTE_NAMES[n.note%12], x+2, (direction === 'down' ? len-5 : mainCanvas.height - 5));
+                mainCtx.restore();
+            }
+        });
+        
+        // GRID LANES (Decoupled)
+        if(showGrid) {
+             for(let i=Math.floor(startKey); i<endKey; i++) {
+                const x = Math.floor((i-startKey)*keyW);
+                const w = Math.ceil(keyW);
+                
+                mainCtx.save(); mainCtx.shadowBlur=0;
+                // Match isBlack logic from config
+                const isBlack = CONFIG.BLACK_KEYS.includes(i%12);
+                
+                // Only draw background if piano off (otherwise redundant/clashing?)
+                // Or draw transparent overlay
+                mainCtx.fillStyle = isBlack ? 'rgba(255,255,255,0.03)' : 'transparent';
+                mainCtx.fillRect(x, 0, w, mainCanvas.height);
+                mainCtx.strokeStyle = 'rgba(255,255,255,0.05)';
+                mainCtx.beginPath(); mainCtx.moveTo(x,0); mainCtx.lineTo(x,mainCanvas.height); mainCtx.stroke();
+                mainCtx.restore();
+             }
+        }
+    }
+
+    function drawHorizontal(startKey, endKey, visKeys, moveDist, keyW) {
+        // keyW passed is actually width calc, but here we need key Height
+        const keyH = mainCanvas.height / visKeys;
+        const thickH = keyH * (noteThickness / 100);
+        const thickOffset = (keyH - thickH) / 2;
+
+        // PIANO
+        if(showPiano) {
+            pianoCtx.fillStyle = getComputedStyle(document.body).getPropertyValue('--panel-bg');
+            pianoCtx.fillRect(0,0, pianoCanvas.width, pianoCanvas.height);
+            
+            for(let i=Math.floor(startKey); i<endKey; i++) {
+                const y = mainCanvas.height - (i - startKey + 1) * keyH;
+                const h = Math.ceil(keyH);
+                const isBlack = CONFIG.BLACK_KEYS.includes(i%12);
+                const noteName = CONFIG.NOTE_NAMES[i%12];
+                
+                pianoCtx.fillStyle = isBlack ? '#222' : '#888';
+                pianoCtx.fillRect(isBlack?0:0, y, isBlack?20:38, h-1);
+                
+                // Labels
+                pianoCtx.fillStyle = '#fff';
+                pianoCtx.font = `bold ${fontScale*0.9}px monospace`;
+                
+                if(noteName === "C") {
+                    const octave = Math.floor(i/12) - 1;
+                    pianoCtx.fillText("C"+octave, 22, y + h - 4);
+                }
+                else if(showLabels || (!isBlack && keyH > 12)) {
+                    if(keyH > 12) pianoCtx.fillText(noteName, 22, y + h - 4);
+                }
+            }
+        }
+
+        // FALLING
+        for(let i=fallingObjects.length-1; i>=0; i--) {
+            const o = fallingObjects[i];
+            o.pos += noteSpeed * (16.66/16.66); // Using moveDist from loop logic passed in? 
+            // Actually I passed moveDist to vertical but not horizontal. 
+            // Let's fix input arg.
+            // Wait, loop() calls drawHorizontal(..., moveDist).
+            // Argument 4 is moveDist.
+            o.pos += arguments[3]; // moveDist
+            
+            if(o.pos > mainCanvas.width + o.len) { fallingObjects.splice(i,1); continue; }
+
+            if(o.type === 'grid') {
+                mainCtx.save(); mainCtx.shadowBlur = 0;
+                mainCtx.strokeStyle = o.isBar ? getComputedStyle(document.body).getPropertyValue('--grid-bar') : getComputedStyle(document.body).getPropertyValue('--grid-beat');
+                mainCtx.lineWidth = o.isBar ? barThickness : 1;
+                mainCtx.beginPath();
+                
+                if (direction === 'right') {
+                    mainCtx.moveTo(o.pos, 0); mainCtx.lineTo(o.pos, mainCanvas.height);
+                } else { // LEFT
+                    const x = mainCanvas.width - o.pos;
+                    mainCtx.moveTo(x, 0); mainCtx.lineTo(x, mainCanvas.height);
+                }
+                mainCtx.stroke();
+                mainCtx.restore();
+            }
+            else if(o.type === 'note') {
+                if(o.note < startKey || o.note >= endKey) continue;
+                const y = mainCanvas.height - (o.note - startKey + 1) * keyH + thickOffset;
+                
+                mainCtx.save();
+                if(glowEnabled && glowAmount > 0) {
+                    mainCtx.shadowColor = (currentTheme === 'chernobyl') ? '#00FFFF' : o.color;
+                    mainCtx.shadowBlur = glowAmount;
+                }
+                mainCtx.fillStyle = o.color;
+                
+                let rx;
+                if (direction === 'right') {
+                    rx = o.pos;
+                } else {
+                    rx = mainCanvas.width - o.pos - o.len;
+                }
+                
+                mainCtx.fillRect(rx, y, o.len, Math.ceil(thickH));
+                mainCtx.restore();
+                
+                if(showLabels && keyH > 20) {
+                    mainCtx.save(); mainCtx.shadowBlur=0; mainCtx.fillStyle='#000'; 
+                    mainCtx.font=`bold ${fontScale}px monospace`;
+                    mainCtx.fillText(CONFIG.NOTE_NAMES[o.note%12], rx + 5, y + keyH/2 + 4);
+                    mainCtx.restore();
+                }
+            }
+        }
+
+        // ACTIVE
+        activeNotes.forEach(n => {
+            if(n.note < startKey || n.note >= endKey) return;
+            const y = mainCanvas.height - (n.note - startKey + 1) * keyH + thickOffset;
+            const duration = performance.now() - n.start;
+            const len = noteSpeed * (duration / 16.66);
+            
+            mainCtx.save();
+            if(glowEnabled && glowAmount > 0) {
+                mainCtx.shadowColor = (currentTheme === 'chernobyl') ? '#00FFFF' : n.color;
+                mainCtx.shadowBlur = glowAmount;
+            }
+            mainCtx.fillStyle = n.color;
+            
+            let rx;
+            if (direction === 'right') {
+                rx = 0;
+            } else {
+                rx = mainCanvas.width - len;
+            }
+            
+            mainCtx.fillRect(rx, y, len, Math.ceil(thickH));
+            mainCtx.restore();
+            
+            if(showLabels && keyH > 20) {
+                mainCtx.save(); mainCtx.shadowBlur=0; mainCtx.fillStyle='#000'; 
+                mainCtx.font=`bold ${fontScale}px monospace`;
+                mainCtx.fillText(CONFIG.NOTE_NAMES[n.note%12], (direction==='right' ? 5 : mainCanvas.width - 15), y + keyH/2 + 4);
+                mainCtx.restore();
+            }
+        });
+        
+        // GRID LANES
+        if(showGrid) {
+             for(let i=Math.floor(startKey); i<endKey; i++) {
+                const y = mainCanvas.height - (i - startKey + 1) * keyH;
+                const h = Math.ceil(keyH);
+                const isBlack = CONFIG.BLACK_KEYS.includes(i%12);
+                
+                mainCtx.save(); mainCtx.shadowBlur=0;
+                mainCtx.fillStyle = isBlack ? 'rgba(255,255,255,0.03)' : 'transparent';
+                mainCtx.fillRect(0, y, mainCanvas.width, h);
+                mainCtx.strokeStyle = 'rgba(255,255,255,0.05)';
+                mainCtx.beginPath(); mainCtx.moveTo(0,y+h); mainCtx.lineTo(mainCanvas.width,y+h); mainCtx.stroke();
+                mainCtx.restore();
+             }
+        }
+    }
+
+    init();
+</script>
+</body>
+</html>

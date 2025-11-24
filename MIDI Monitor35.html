@@ -1,0 +1,1423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CATHEDRAL COMMANDER // MK XXXV</title>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@500;700&family=VT323&family=Nosifer&family=Playfair+Display:wght@700&family=Orbitron:wght@700&display=swap" rel="stylesheet">
+    <style>
+        /* --- CORE VARIABLES --- */
+        :root {
+            --bg-color: #050505;
+            --panel-bg: #0a0a0a;
+            --text-color: #00ff41;
+            --accent-color: #ff0055;
+            --data-color: #00ccff;
+            --grid-beat: #222;
+            --grid-bar: #666;
+            --font-stack: 'Rajdhani', sans-serif;
+            --font-size-base: 13px;
+        }
+
+        * { box-sizing: border-box; user-select: none; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: var(--font-stack);
+            margin: 0;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            font-size: var(--font-size-base);
+            transition: background 0.3s, color 0.3s;
+        }
+
+        /* --- HEADER --- */
+        header {
+            height: 50px;
+            background: var(--panel-bg);
+            border-bottom: 2px solid var(--text-color);
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+            gap: 15px;
+            z-index: 100;
+            flex-shrink: 0;
+            justify-content: space-between;
+            transition: background 0.3s, border 0.3s;
+        }
+
+        h1 { 
+            margin: 0; font-size: calc(var(--font-size-base) * 1.4); letter-spacing: 3px; 
+            color: var(--accent-color); font-weight: 700; white-space: nowrap; 
+            text-transform: uppercase; cursor: default;
+        }
+
+        .header-left, .header-right { display: flex; align-items: center; gap: 10px; height: 100%; }
+
+        /* CONTROLS */
+        select, button, input[type=number], input[type=text] {
+            background: #000; color: var(--text-color); border: 1px solid #333;
+            padding: 4px 8px; font-family: var(--font-stack); font-size: var(--font-size-base);
+            text-transform: uppercase; cursor: pointer; letter-spacing: 1px;
+            outline: none; position: relative; z-index: 101;
+        }
+        button:hover, select:hover { background: #222; border-color: var(--text-color); }
+        button.active { background: var(--text-color); color: #000; font-weight: bold; box-shadow: 0 0 10px var(--text-color); }
+        button.icon-btn { font-size: calc(var(--font-size-base) * 1.2); padding: 2px 8px; }
+        
+        #file-input { display: none; }
+
+        .range-wrap { display: flex; flex-direction: column; gap: 2px; }
+        .range-wrap label { font-size: calc(var(--font-size-base) * 0.7); color: #666; letter-spacing: 1px; }
+        input[type=range] {
+            width: 100px; height: 4px; background: #333; appearance: none; cursor: pointer; position: relative; z-index: 101;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            appearance: none; width: 10px; height: 10px; background: var(--text-color);
+        }
+
+        /* --- SETTINGS PANEL --- */
+        #settings-panel {
+            position: absolute; top: 50px; left: 0; width: 100%;
+            background: var(--panel-bg); border-bottom: 2px solid var(--text-color);
+            padding: 15px; display: none; z-index: 90;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.8);
+            max-height: calc(100vh - 60px); overflow-y: auto;
+        }
+        #settings-panel.open { display: grid; }
+        
+        .setting-col { display: flex; flex-direction: column; gap: 8px; }
+        .setting-col h3 { margin: 0 0 5px 0; font-size: var(--font-size-base); color: var(--accent-color); border-bottom: 1px solid #333; padding-bottom: 2px;}
+        .setting-row { display: flex; justify-content: space-between; align-items: center; }
+        .setting-row label { font-size: calc(var(--font-size-base) * 0.9); color: #aaa; }
+        
+        .sig-inputs { display: flex; gap: 5px; align-items: center; }
+        .sig-inputs input { width: 40px; text-align: center; }
+
+        /* --- WORKSPACE LAYOUT --- */
+        .workspace {
+            display: flex; flex-grow: 1; height: calc(100vh - 50px); position: relative;
+            overflow: hidden; flex-direction: row; 
+        }
+        .workspace.sidebar-bottom { flex-direction: column; }
+
+        .vis-wrapper {
+            flex-grow: 1; position: relative; display: flex; 
+            overflow: hidden; background: #000; flex-direction: column;
+        }
+
+        /* PIANO ROLL */
+        #piano-roll-header {
+            background: var(--panel-bg); flex-shrink: 0; display: none; 
+            border-style: solid; border-color: #333; border-width: 0;
+        }
+        #piano-roll-header.visible { display: block; }
+
+        /* Dynamic Layouts */
+        .workspace.dir-down .vis-wrapper { flex-direction: column; }
+        .workspace.dir-down #piano-roll-header { width: 100%; height: 30px; border-bottom-width: 1px; }
+        
+        .workspace.dir-up .vis-wrapper { flex-direction: column-reverse; }
+        .workspace.dir-up #piano-roll-header { width: 100%; height: 30px; border-top-width: 1px; }
+
+        .workspace.dir-right .vis-wrapper { flex-direction: row; }
+        .workspace.dir-right #piano-roll-header { width: 40px; height: 100%; border-right-width: 1px; }
+
+        .workspace.dir-left .vis-wrapper { flex-direction: row-reverse; }
+        .workspace.dir-left #piano-roll-header { width: 40px; height: 100%; border-left-width: 1px; }
+
+        /* CANVAS CONTAINER */
+        #visualizer-container { flex-grow: 1; position: relative; }
+        canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; image-rendering: pixelated; }
+        
+        #overlayCanvas { pointer-events: none; z-index: 10; }
+        #mainCanvas { z-index: 1; }
+
+        /* --- SIDEBAR --- */
+        #sidebar {
+            background: var(--panel-bg); 
+            border-style: solid; border-color: var(--text-color); border-width: 0;
+            display: none; flex-direction: column; flex-shrink: 0; z-index: 80; position: relative;
+        }
+        #sidebar.visible { display: flex; }
+        
+        .workspace:not(.sidebar-bottom) #sidebar { width: 300px; border-left-width: 2px; }
+        .workspace.sidebar-bottom #sidebar { height: 200px; width: 100%; border-top-width: 2px; }
+        
+        .resizer { position: absolute; z-index: 85; background: rgba(255,255,255,0.05); }
+        .resizer:hover { background: var(--accent-color); }
+        .workspace:not(.sidebar-bottom) .resizer { width: 5px; cursor: col-resize; left: 0; top: 0; bottom: 0; }
+        .workspace.sidebar-bottom .resizer { height: 5px; cursor: row-resize; top: 0; left: 0; right: 0; }
+
+        .sidebar-header {
+            padding: 8px; background: rgba(0,0,0,0.2); font-weight: 700; 
+            border-bottom: 1px solid #333; letter-spacing: 1px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .sidebar-content {
+            flex-grow: 1; overflow-y: auto; padding: 5px;
+            display: flex; flex-direction: column; gap: 4px;
+        }
+        
+        /* CC WIDGETS */
+        .cc-widget {
+            background: rgba(0,0,0,0.3); border: 1px solid #333; padding: 0 5px;
+            display: flex; align-items: center; height: 40px; gap: 8px;
+            animation: flashCC 0.1s ease-out; cursor: pointer; 
+        }
+        @keyframes flashCC { from { background: #222; } to { background: rgba(0,0,0,0.3); } }
+        
+        .cc-meta { width: 80px; display: flex; flex-direction: column; gap: 2px; pointer-events: none; }
+        .cc-label-row { display: flex; gap: 4px; font-size: var(--font-size-lbl); font-weight: bold; }
+        .cc-name { font-size: var(--font-size-lbl); opacity: 0.7; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-transform: uppercase; }
+        .cc-val-big { font-size: var(--font-size-cc); color: var(--data-color); font-weight: 700; font-family: monospace;}
+        .cc-graph-container { flex-grow: 1; height: 30px; background: #000; border: 1px solid #222; position: relative; }
+        .cc-bg-label { 
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+            font-size: 14px; color: rgba(255,255,255,0.1); font-weight: 900; pointer-events: none; 
+            white-space: nowrap; text-transform: uppercase;
+        }
+
+        /* CHANNEL MATRIX */
+        .ch-matrix { display: grid; grid-template-columns: repeat(16, 1fr); gap: 1px; width: 200px; display: none; } 
+        .ch-matrix.visible { display: grid; }
+        .ch-led {
+            height: 10px; background: #111; border: 1px solid #333;
+            font-size: 7px; display: flex; align-items: center; justify-content: center; color: #444;
+            transition: background 0.1s, box-shadow 0.1s;
+        }
+
+        /* STATUS */
+        #status-box { display: flex; align-items: center; gap: 10px; border: 1px solid #333; padding: 0 10px; height: 30px; }
+        #transport-val { font-weight: bold; color: #555; width: 40px; text-align: center; font-size: calc(var(--font-size-base) * 0.9); }
+        #bpm-box { display: flex; align-items: center; gap: 5px; }
+        #bpm-val { color: var(--accent-color); font-weight: bold; font-size: calc(var(--font-size-base) * 1.2); width: 50px; text-align:right;}
+        .bpm-label { font-size: calc(var(--font-size-base) * 0.7); color: #666; }
+        #clock-dot { width: 6px; height: 6px; background: #333; border-radius: 50%; }
+        #clock-dot.beat { background: var(--text-color); box-shadow: 0 0 8px var(--text-color); }
+
+        /* CRT SCANLINES */
+        .crt-scanlines {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to bottom, rgba(0,0,0,0) 50%, rgba(0,0,0,0.1) 50%);
+            background-size: 100% 4px; pointer-events: none; z-index: 99;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="header-left">
+        <h1 id="app-title">MK XXXV</h1>
+        
+        <div class="control-group">
+            <select id="midi-input" style="min-width: 150px;"><option>SCANNING...</option></select>
+        </div>
+
+        <div id="status-box">
+            <span id="transport-val">STOP</span>
+            <div style="width:1px; height:15px; background:#333"></div>
+            <div id="bpm-box">
+                <div id="clock-dot"></div>
+                <span id="bpm-val">NO CLOCK</span>
+                <span class="bpm-label">BPM</span>
+            </div>
+        </div>
+
+        <button id="btn-toggle-cc" class="icon-btn active">CC</button>
+
+        <div class="ch-matrix visible" id="ch-matrix">
+            <!-- JS GEN -->
+        </div>
+    </div>
+
+    <div class="header-right">
+        <div class="range-wrap">
+            <label>ZOOM</label>
+            <input type="range" id="zoom-slider" min="1" max="8" step="0.1" value="1">
+        </div>
+        <div class="range-wrap">
+            <label>POS</label>
+            <input type="range" id="pan-slider" min="0" max="100" step="1" value="30">
+        </div>
+        
+        <button id="btn-settings" class="icon-btn">[ * ]</button>
+    </div>
+</header>
+
+<!-- SETTINGS PANEL -->
+<div id="settings-panel">
+    <div class="setting-col">
+        <h3>SYSTEM CONTROL</h3>
+        <div class="setting-row">
+            <button id="btn-manual-init" style="width: 100%; background: #222; border-color: var(--accent-color); color: var(--accent-color);">[ INITIALIZE MIDI ]</button>
+        </div>
+        <div class="setting-row">
+            <div style="display:flex; gap:2px; width:100%">
+                <button id="btn-save" style="width:50%">SAVE CFG</button>
+                <button id="btn-load" style="width:50%">LOAD CFG</button>
+                <input type="file" id="file-input" accept=".json">
+            </div>
+        </div>
+    </div>
+    
+    <div class="setting-col">
+        <h3>IMMERSION</h3>
+        <div class="setting-row">
+            <label>THEME</label>
+            <select id="sel-theme">
+                <option value="matrix">MATRIX</option>
+                <option value="crave">CRAVE</option>
+                <option value="masseffect">N7</option>
+                <option value="synthwave">SYNTHWAVE</option>
+                <option value="neon">NEON</option>
+                <option value="chernobyl">CHERNOBYL</option>
+                <option value="mono">MONOCHROME</option>
+                <option value="warhammer">WARHAMMER</option>
+                <option value="helldiver">HELLDIVERS 2</option>
+                <option value="elektron">ELEKTRON</option>
+                <option value="oxi">OXI</option>
+                <option value="sanctuary">SANCTUARY</option>
+                <option value="kerbal">KERBAL</option>
+                <option value="accordion">ACCORDION</option>
+                <option value="neve">NEVE</option>
+            </select>
+        </div>
+        <div class="setting-row">
+            <label>NOTE COLOR</label>
+            <select id="sel-color-mode">
+                <option value="channel">CHANNEL</option>
+                <option value="octave">OCTAVE ZONE</option>
+                <option value="root">ROOT NOTE</option>
+            </select>
+        </div>
+        <div class="setting-row"><label>GLOW ON</label><input type="checkbox" id="chk-glow"></div>
+        <div class="setting-row"><label>GLOW AMT</label><input type="range" id="glow-slider" min="0" max="50" value="15"></div>
+        <div class="setting-row"><label>TRAILS</label><input type="range" id="persist-slider" min="0" max="0.9" step="0.01" value="0"></div>
+        <div class="setting-row"><label>NOTE WIDTH</label><input type="range" id="thick-slider" min="10" max="100" value="100"></div>
+        <div class="setting-row">
+            <label>SHAPE</label>
+            <select id="sel-shape">
+                <option value="bar">BAR</option>
+                <option value="bubble">BUBBLE</option>
+                <option value="tear">TEARDROP</option>
+                <option value="hex">HEX</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="setting-col">
+        <h3>AVIONICS</h3>
+        <div class="setting-row"><label>DIRECTION</label>
+            <select id="sel-direction">
+                <option value="down">DOWN (WATERFALL)</option>
+                <option value="up">UP (RISING)</option>
+                <option value="right">RIGHT (TIMELINE)</option>
+                <option value="left">LEFT (REWIND)</option>
+            </select>
+        </div>
+        <div class="setting-row"><label>CC PANEL POS</label>
+            <select id="sel-sidebar-pos">
+                <option value="right">RIGHT SIDE</option>
+                <option value="bottom">BOTTOM</option>
+            </select>
+        </div>
+        <div class="setting-row"><label>CC SCROLL</label>
+            <select id="sel-cc-dir">
+                <option value="left">SCROLL LEFT</option>
+                <option value="right">SCROLL RIGHT</option>
+            </select>
+        </div>
+        <div class="setting-row"><label>CC TIMEOUT</label>
+            <select id="sel-cc-timeout">
+                <option value="0">NEVER</option>
+                <option value="2000">2 SEC</option>
+                <option value="5000">5 SEC</option>
+                <option value="10000">10 SEC</option>
+                <option value="60000">60 SEC</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="setting-col">
+        <h3>FLIGHT DATA</h3>
+        <div class="setting-row"><label>TIME SIG</label>
+            <div class="sig-inputs">
+                <input type="number" id="sig-num" value="4" min="1" max="32"><span>/</span><input type="number" id="sig-den" value="4" min="1" max="32">
+            </div>
+        </div>
+        <div class="setting-row"><label>BAR THICK</label><input type="range" id="grid-thick" min="1" max="8" value="2"></div>
+        <div class="setting-row"><label>NOTE SPEED</label><input type="range" id="speed-slider" min="1" max="10" value="4"></div>
+        
+        <div class="setting-row"><label>SHOW CC</label><input type="checkbox" id="chk-cc-panel" checked></div>
+        <div class="setting-row"><label>SHOW SYNC</label><input type="checkbox" id="chk-bpm" checked></div>
+        <div class="setting-row"><label>SHOW MATRIX</label><input type="checkbox" id="chk-matrix" checked></div>
+        <div class="setting-row"><label>SHOW PIANO</label><input type="checkbox" id="chk-piano" checked></div>
+        <div class="setting-row"><label>SHOW LANES</label><input type="checkbox" id="chk-grid" checked></div>
+        <div class="setting-row"><label>SHOW BARS</label><input type="checkbox" id="chk-bar" checked></div>
+        <div class="setting-row"><label>SHOW C-LINES</label><input type="checkbox" id="chk-clines" checked></div>
+        <div class="setting-row"><label>SHOW LABELS</label><input type="checkbox" id="chk-labels"></div>
+    </div>
+
+    <div class="setting-col">
+        <h3>TYPOGRAPHY</h3>
+        <div class="setting-row"><label>FONT</label>
+            <select id="sel-font">
+                <option value="tech">DIN / TECH</option>
+                <option value="hacker">TERMINAL</option>
+                <option value="gory">GORY</option>
+                <option value="elegant">IMPERIAL</option>
+                <option value="scifi">SCI-FI</option>
+                <option value="system">SYSTEM</option>
+            </select>
+        </div>
+        <div class="setting-row"><label>UI SIZE</label><input type="range" id="font-size-slider" min="10" max="24" value="13"></div>
+        <div class="setting-row"><label>LBL SIZE</label><input type="range" id="lbl-size-slider" min="8" max="20" value="10"></div>
+        <div class="setting-row"><label>CC SIZE</label><input type="range" id="cc-size-slider" min="8" max="24" value="14"></div>
+    </div>
+</div>
+
+<div class="workspace dir-down" id="main-workspace">
+    <div class="vis-wrapper" id="vis-wrapper">
+        <div id="piano-roll-header" class="visible">
+            <canvas id="pianoCanvas"></canvas>
+        </div>
+        <div id="visualizer-container">
+            <div class="crt-scanlines"></div>
+            <canvas id="mainCanvas"></canvas>
+            <canvas id="overlayCanvas"></canvas>
+        </div>
+    </div>
+
+    <div id="sidebar" class="visible">
+        <div class="resizer" id="drag-handle"></div>
+        <div class="sidebar-header">
+            <span>CC FLIGHT RECORDER</span>
+            <button class="icon-btn" onclick="resetCCData()">RESET DATA</button>
+        </div>
+        <div class="sidebar-content" id="cc-container">
+            <div style="text-align:center; color:var(--text-color); opacity:0.5; font-size:10px; padding-top:20px;">NO SIGNAL</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    /**
+     * CATHEDRAL COMMANDER MK XXXV
+     * "VIENNA VELOCITY ULTIMATE"
+     * V20 ENGINE BLOCK + V34 AVIONICS
+     */
+
+    // --- CONFIGURATION ---
+    const CFG = {
+        theme: 'matrix', noteSpeed: 4, zoom: 1, pan: 30, colorMode: 'channel', ccTimeout: 0,
+        showLabels: false, showGrid: true, showBarLines: true, showPiano: true, showCLines: true, showCC: true, showBPM: true, showMatrix: true,
+        glow: false, glowAmt: 15, direction: 'down', persistence: 0, noteThickness: 100, noteShape: 'bar',
+        sidebarPos: 'right', ccScrollDir: 'left', sigNum: 4, sigDen: 4, barThick: 2,
+        font: 'tech', fontSizeBase: 13, fontSizeLbl: 10, fontSizeCC: 14
+    };
+
+    // --- THEME ENGINE ---
+    const THEMES = {
+        matrix: { bg:'#050505', panel:'#0a0a0a', text:'#00ff41', accent:'#ff0055', data:'#00ccff', grid:'#222', bar:'#666', ch:['#FF0055','#00FF41','#00CCFF','#FFCC00','#9900FF','#FF6600','#00FFCC','#FF3399','#EEE','#888','#B71C1C','#1B5E20','#33691E','#3E2723','#01579B','#4A148C']},
+        crave: { bg:'#1a1a1a', panel:'#222', text:'#F57F17', accent:'#FFCC00', data:'#888', grid:'#333', bar:'#F57F17', ch:['#F57F17','#d1d1d1','#FFCC00','#a0a0a0','#F57F17','#d1d1d1','#FFCC00','#a0a0a0','#F57F17','#d1d1d1','#FFCC00','#a0a0a0','#F57F17','#d1d1d1','#FFCC00','#a0a0a0']},
+        masseffect: { bg:'#0b1624', panel:'#131b29', text:'#4DB2FF', accent:'#D9531E', data:'#fff', grid:'#1c2b3d', bar:'#D9531E', ch:['#D9531E','#4DB2FF','#fff','#888','#D9531E','#4DB2FF','#fff','#888','#D9531E','#4DB2FF','#fff','#888','#D9531E','#4DB2FF','#fff','#888']},
+        synthwave: { bg:'#12001f', panel:'#1e0033', text:'#00f2ff', accent:'#ff0099', data:'#bd00ff', grid:'#36005c', bar:'#ff0099', ch:['#ff0099','#00f2ff','#bd00ff','#faff00','#ff0099','#00f2ff','#bd00ff','#faff00','#ff0099','#00f2ff','#bd00ff','#faff00','#ff0099','#00f2ff','#bd00ff','#faff00']},
+        neon: { bg:'#000', panel:'#000', text:'#0f0', accent:'#f0f', data:'#0ff', grid:'#333', bar:'#fff', ch:['#f00','#0f0','#00f','#ff0','#0ff','#f0f','#fff','#aaa','#f00','#0f0','#00f','#ff0','#0ff','#f0f','#fff','#aaa']},
+        mono: { bg:'#000', panel:'#000', text:'#fff', accent:'#fff', data:'#fff', grid:'#333', bar:'#fff', ch:['#fff','#fff','#fff','#fff','#fff','#fff','#fff','#fff','#fff','#fff','#fff','#fff','#fff','#fff','#fff','#fff']},
+        warhammer: { bg:'#0b0500', panel:'#1a0f00', text:'#d4af37', accent:'#8a0000', data:'#7a7a7a', grid:'#2b1d0e', bar:'#8a0000', ch:['#8a0000','#d4af37','#5e5e5e','#ffffff','#8a0000','#d4af37','#5e5e5e','#ffffff','#8a0000','#d4af37','#5e5e5e','#ffffff','#8a0000','#d4af37','#5e5e5e','#ffffff']},
+        helldiver: { bg:'#111', panel:'#1a1a1a', text:'#ffe600', accent:'#fff', data:'#aaa', grid:'#333', bar:'#ffe600', ch:['#ffe600','#000','#fff','#ffe600','#333','#fff','#ffe600','#333','#fff','#ffe600','#333','#fff','#ffe600','#333','#fff','#ffe600']},
+        elektron: { bg:'#222', panel:'#333', text:'#ff6600', accent:'#ff3333', data:'#aaa', grid:'#444', bar:'#ff6600', ch:['#ff3333','#ff6600','#ffffff','#888','#ff3333','#ff6600','#ffffff','#888','#ff3333','#ff6600','#ffffff','#888','#ff3333','#ff6600','#ffffff','#888']},
+        oxi: { bg:'#000', panel:'#111', text:'#fff', accent:'#00ffcc', data:'#ff00ff', grid:'#222', bar:'#fff', ch:['#ff99cc','#99ccff','#99ffcc','#ffff99','#cc99ff','#ffcc99','#fff','#888','#ff99cc','#99ccff','#99ffcc','#ffff99','#cc99ff','#ffcc99','#fff','#888']},
+        lsd: { bg:'#000', panel:'#100020', text:'#00ff00', accent:'#ff00ff', data:'#00ffff', grid:'#222', bar:'#fff', ch:['#f00','#ff8000','#ff0','#80ff00','#0f0','#00ff80','#0ff','#0080ff','#00f','#8000ff','#f0f','#ff0080','#fff','#888','#444','#000']},
+        sanctuary: { bg:'#050000', panel:'#1a0000', text:'#ff2200', accent:'#ffcc00', data:'#590000', grid:'#220000', bar:'#8a0000', ch:['#8a0000','#ff2200','#ffcc00','#440000','#8a0000','#ff2200','#ffcc00','#440000','#8a0000','#ff2200','#ffcc00','#440000','#8a0000','#ff2200','#ffcc00','#440000']},
+        kerbal: { bg:'#222', panel:'#333', text:'#BADA55', accent:'#fff', data:'#888', grid:'#444', bar:'#BADA55', ch:['#BADA55','#fff','#888','#BADA55','#fff','#888','#BADA55','#fff','#888','#BADA55','#fff','#888','#BADA55','#fff','#888','#BADA55']},
+        chernobyl: { bg:'#000000', panel:'#050505', text:'#00ffff', accent:'#0099ff', data:'#0055ff', grid:'#111', bar:'#00ffff', ch:['#0ff','#00ccff','#0099ff','#0066ff','#fff','#aaa','#0ff','#00ccff','#0099ff','#0066ff','#fff','#aaa','#0ff','#00ccff','#0099ff','#0066ff']},
+        accordion: { bg:'#1a1510', panel:'#2b231a', text:'#e6dcc8', accent:'#8c2626', data:'#111', grid:'#3e3226', bar:'#e6dcc8', ch:['#e6dcc8','#111','#8c2626','#3e3226','#e6dcc8','#111','#8c2626','#3e3226','#e6dcc8','#111','#8c2626','#3e3226','#e6dcc8','#111','#8c2626','#3e3226']},
+        neve: { bg:'#2a2f35', panel:'#353b42', text:'#aab2bd', accent:'#bf2e2e', data:'#2e5280', grid:'#444b54', bar:'#bf2e2e', ch:['#2e5280','#bf2e2e','#aab2bd','#2a2f35','#2e5280','#bf2e2e','#aab2bd','#2a2f35','#2e5280','#bf2e2e','#aab2bd','#2a2f35','#2e5280','#bf2e2e','#aab2bd','#2a2f35']}
+    };
+
+    const DATA = {
+        NOTE_NAMES: ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"],
+        BLACK_KEYS: [1, 3, 6, 8, 10],
+        PPQN: 24
+    };
+
+    // --- INTERNAL STATE ---
+    let midiAccess = null;
+    let selectedInputId = null;
+    const activeNotes = new Map();
+    const fallingObjects = []; 
+    const ccMonitors = new Map();
+    const chIndicators = [];
+    let clockTicks = 0;
+    let lastClockTime = 0;
+    let tickHistory = []; 
+    let lastActiveClock = 0;
+    let ticksPerBar = 96;
+    let barTickCounter = 0; 
+    let lastFrameTime = performance.now();
+
+    // --- DOM ---
+    const mainCanvas = document.getElementById('mainCanvas');
+    const overlayCanvas = document.getElementById('overlayCanvas');
+    const pianoCanvas = document.getElementById('pianoCanvas');
+    const mainCtx = mainCanvas.getContext('2d', { alpha: true });
+    const overlayCtx = overlayCanvas.getContext('2d', { alpha: true });
+    const pianoCtx = pianoCanvas.getContext('2d', { alpha: false });
+    const chContainer = document.getElementById('ch-matrix');
+
+    // --- INIT ---
+    // V20 STYLE SIMPLE STARTUP
+    window.onload = function() {
+        setupChannelMatrix();
+        setupEventListeners();
+        
+        // Initial Config
+        applyConfigToUI();
+        applyTheme(CFG.theme);
+        updateTimeSig(); 
+        updateFont(CFG.font);
+        updateCCFonts();
+        resize();
+        window.addEventListener('resize', resize);
+        
+        // ATTEMPT AUTO INIT IMMEDIATELY
+        if (navigator.requestMIDIAccess) {
+            initMIDI();
+        } else {
+            document.getElementById('midi-input').innerHTML = '<option>NO BROWSER SUPPORT</option>';
+        }
+
+        setInterval(cleanupCCs, 1000);
+        requestAnimationFrame(loop);
+    };
+
+    // --- SETUP ---
+    function setupChannelMatrix() {
+        for(let i=0; i<16; i++) {
+            const d = document.createElement('div');
+            d.className = 'ch-led';
+            d.textContent = i+1;
+            chContainer.appendChild(d);
+            chIndicators.push(d);
+        }
+    }
+
+    function applyTheme(key) {
+        CFG.theme = key;
+        const t = THEMES[key];
+        const r = document.documentElement.style;
+        r.setProperty('--bg-color', t.bg);
+        r.setProperty('--panel-bg', t.panel);
+        r.setProperty('--text-color', t.text);
+        r.setProperty('--accent-color', t.accent);
+        r.setProperty('--data-color', t.data);
+        r.setProperty('--grid-beat', t.grid);
+        r.setProperty('--grid-bar', t.bar);
+        document.getElementById('app-title').innerText = `MK XXXV // ${key.toUpperCase()}`;
+    }
+
+    function applyConfigToUI() {
+        const setVal = (id, val) => { const el=document.getElementById(id); if(el) el.value=val; };
+        const setChk = (id, val) => { const el=document.getElementById(id); if(el) { el.checked=val; el.dispatchEvent(new Event('change')); }};
+
+        setVal('sel-theme', CFG.theme);
+        setVal('speed-slider', CFG.noteSpeed);
+        setVal('zoom-slider', CFG.zoom);
+        setVal('pan-slider', CFG.pan);
+        setVal('sel-color-mode', CFG.colorMode);
+        setVal('sel-cc-timeout', CFG.ccTimeout);
+        setChk('chk-labels', CFG.showLabels);
+        setChk('chk-grid', CFG.showGrid);
+        setChk('chk-bar', CFG.showBarLines);
+        setChk('chk-piano', CFG.showPiano);
+        setChk('chk-clines', CFG.showCLines);
+        setChk('chk-cc-panel', CFG.showCC);
+        setChk('chk-bpm', CFG.showBPM);
+        setChk('chk-matrix', CFG.showMatrix);
+        setChk('chk-glow', CFG.glow);
+        setVal('glow-slider', CFG.glowAmt);
+        setVal('sel-direction', CFG.direction);
+        setVal('persist-slider', CFG.persistence);
+        setVal('thick-slider', CFG.noteThickness);
+        setVal('sel-shape', CFG.noteShape);
+        setVal('sel-sidebar-pos', CFG.sidebarPos);
+        setVal('sel-cc-dir', CFG.ccScrollDir);
+        setVal('sig-num', CFG.sigNum);
+        setVal('sig-den', CFG.sigDen);
+        setVal('grid-thick', CFG.barThick);
+        setVal('sel-font', CFG.font);
+        setVal('font-size-slider', CFG.fontSizeBase);
+        setVal('lbl-size-slider', CFG.fontSizeLbl);
+        setVal('cc-size-slider', CFG.fontSizeCC);
+    }
+
+    function saveConfig() {
+        const blob = new Blob([JSON.stringify(CFG)], {type: "application/json"});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = "cathedral_config.json";
+        a.click();
+    }
+
+    function loadConfig(e) {
+        const file = e.target.files[0];
+        if(!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const data = JSON.parse(e.target.result);
+                Object.assign(CFG, data);
+                applyConfigToUI();
+                applyTheme(CFG.theme);
+                updateFont(CFG.font);
+                updateTimeSig();
+                updateCCFonts();
+                resize();
+            } catch(err) { alert("Invalid Config File"); }
+        };
+        reader.readAsText(file);
+    }
+
+    function cleanupCCs() {
+        if (CFG.ccTimeout === 0) return;
+        const now = Date.now();
+        ccMonitors.forEach((mon, id) => {
+            if (now - mon.lastUpdate > CFG.ccTimeout) {
+                mon.element.remove();
+                ccMonitors.delete(id);
+            }
+        });
+        if (ccMonitors.size === 0 && document.getElementById('cc-container').children.length === 0) {
+             document.getElementById('cc-container').innerHTML = '<div style="text-align:center; color:var(--text-color); opacity:0.5; font-size:10px; padding-top:20px;">NO SIGNAL</div>';
+        }
+    }
+
+    function setupEventListeners() {
+        const safeListen = (id, evt, fn) => {
+            const el = document.getElementById(id);
+            if(el) el.addEventListener(evt, fn);
+        };
+
+        safeListen('zoom-slider', 'input', e => CFG.zoom = parseFloat(e.target.value));
+        safeListen('pan-slider', 'input', e => CFG.pan = parseFloat(e.target.value));
+        
+        safeListen('btn-labels', 'click', e => { 
+            CFG.showLabels = !CFG.showLabels; 
+            document.getElementById('chk-labels').checked = CFG.showLabels;
+            e.target.classList.toggle('active'); 
+        });
+        
+        safeListen('btn-settings', 'click', e => {
+            const p = document.getElementById('settings-panel');
+            if(p) p.classList.toggle('open');
+            e.target.classList.toggle('active');
+        });
+        
+        // MANUAL INIT TRIGGER
+        safeListen('btn-manual-init', 'click', (e) => {
+            e.target.innerText = "REQUESTING...";
+            initMIDI();
+        });
+        // REDUNDANT CLICK ON DROPDOWN
+        safeListen('midi-input', 'click', () => {
+             if(!midiAccess) initMIDI();
+        });
+        
+        safeListen('btn-toggle-cc', 'click', e => {
+            const chk = document.getElementById('chk-cc-panel');
+            chk.checked = !chk.checked;
+            chk.dispatchEvent(new Event('change'));
+        });
+
+        safeListen('btn-save', 'click', saveConfig);
+        safeListen('btn-load', 'click', () => document.getElementById('file-input').click());
+        safeListen('file-input', 'change', loadConfig);
+
+        // Toggles
+        const toggle = (id, prop, fn) => safeListen(id, 'change', e => { CFG[prop] = e.target.checked; if(fn) fn(e.target.checked); });
+        toggle('chk-bpm', 'showBPM', v => document.getElementById('bpm-box').style.display = v ? 'flex' : 'none');
+        toggle('chk-matrix', 'showMatrix', v => document.getElementById('ch-matrix').classList.toggle('visible', v));
+        toggle('chk-piano', 'showPiano', v => { 
+            document.getElementById('piano-roll-header').classList.toggle('visible', v); 
+            resize(); 
+        });
+        toggle('chk-grid', 'showGrid');
+        toggle('chk-bar', 'showBarLines');
+        toggle('chk-clines', 'showCLines');
+        toggle('chk-labels', 'showLabels');
+        
+        toggle('chk-cc-panel', 'showCC', v => {
+            document.getElementById('sidebar').classList.toggle('visible', v);
+            const btn = document.getElementById('btn-toggle-cc');
+            if(v) btn.classList.add('active'); else btn.classList.remove('active');
+            resize();
+        });
+        
+        toggle('chk-glow', 'glow');
+
+        const bind = (id, prop, fn) => safeListen(id, 'input', e => { 
+            CFG[prop] = isNaN(e.target.value) ? e.target.value : parseFloat(e.target.value); 
+            if(fn) fn(e.target.value); 
+        });
+        const bindChange = (id, prop, fn) => safeListen(id, 'change', e => { 
+             CFG[prop] = isNaN(e.target.value) ? e.target.value : parseFloat(e.target.value); 
+             if(fn) fn(e.target.value); 
+        });
+
+        bindChange('sel-theme', 'theme', applyTheme);
+        bindChange('sel-color-mode', 'colorMode');
+        bindChange('sel-cc-timeout', 'ccTimeout');
+        bindChange('sel-font', 'font', updateFont);
+        bindChange('sel-shape', 'noteShape');
+        bindChange('sel-cc-dir', 'ccScrollDir');
+
+        bind('speed-slider', 'noteSpeed');
+        bind('sig-num', 'sigNum', updateTimeSig);
+        bind('sig-den', 'sigDen', updateTimeSig);
+        bind('grid-thick', 'barThick');
+        bind('glow-slider', 'glowAmt');
+        bind('persist-slider', 'persistence');
+        bind('thick-slider', 'noteThickness');
+        
+        bind('font-size-slider', 'fontSizeBase', v => document.documentElement.style.setProperty('--font-size-base', v + 'px'));
+        bind('lbl-size-slider', 'fontSizeLbl');
+        bind('cc-size-slider', 'fontSizeCC', v => updateCCFonts());
+
+        bindChange('sel-sidebar-pos', 'sidebarPos', v => {
+            const ws = document.getElementById('main-workspace');
+            if (v === 'bottom') ws.classList.add('sidebar-bottom');
+            else ws.classList.remove('sidebar-bottom');
+            resize();
+        });
+
+        bindChange('sel-direction', 'direction', v => {
+            const ws = document.getElementById('main-workspace');
+            ws.className = 'workspace'; 
+            ws.classList.add(`dir-${v}`);
+            if (CFG.sidebarPos === 'bottom') ws.classList.add('sidebar-bottom');
+            fallingObjects.length = 0; 
+            resize();
+        });
+
+        const handle = document.getElementById('drag-handle');
+        const sidebar = document.getElementById('sidebar');
+        if(handle) {
+            let isResizing = false;
+            handle.addEventListener('mousedown', () => isResizing = true);
+            window.addEventListener('mousemove', e => {
+                if(!isResizing) return;
+                if (CFG.sidebarPos === 'bottom') sidebar.style.height = (window.innerHeight - e.clientY - 50) + 'px';
+                else sidebar.style.width = (window.innerWidth - e.clientX) + 'px';
+                resize();
+            });
+            window.addEventListener('mouseup', () => isResizing = false);
+        }
+    }
+
+    function updateTimeSig() {
+        ticksPerBar = Math.round((4 / CFG.sigDen) * CFG.sigNum * DATA.PPQN);
+        barTickCounter = 0;
+    }
+
+    function updateFont(val) {
+        const r = document.documentElement.style;
+        if(val==='tech') r.setProperty('--font-stack', "'Rajdhani', sans-serif");
+        else if(val==='hacker') r.setProperty('--font-stack', "'VT323', monospace");
+        else if(val==='gory') r.setProperty('--font-stack', "'Nosifer', cursive");
+        else if(val==='elegant') r.setProperty('--font-stack', "'Playfair Display', serif");
+        else if(val==='scifi') r.setProperty('--font-stack', "'Orbitron', sans-serif");
+        else r.setProperty('--font-stack', "sans-serif");
+    }
+
+    function updateCCFonts() {
+        const els = document.querySelectorAll('.cc-val-big');
+        els.forEach(el => el.style.fontSize = CFG.fontSizeCC + 'px');
+    }
+
+    function resize() {
+        const vCont = document.getElementById('visualizer-container');
+        mainCanvas.width = vCont.offsetWidth;
+        mainCanvas.height = vCont.offsetHeight;
+        overlayCanvas.width = vCont.offsetWidth;
+        overlayCanvas.height = vCont.offsetHeight;
+        
+        if (CFG.direction === 'down' || CFG.direction === 'up') {
+            pianoCanvas.width = vCont.offsetWidth;
+            pianoCanvas.height = 30;
+        } else {
+            pianoCanvas.width = 40;
+            pianoCanvas.height = vCont.offsetHeight;
+        }
+    }
+
+    // --- COLOR ENGINE ---
+    function getNoteColor(note, ch) {
+        if (CFG.theme === 'chernobyl') return '#00ffff'; 
+        if (CFG.colorMode === 'channel') return THEMES[CFG.theme].ch[ch];
+        if (CFG.colorMode === 'octave') {
+            const octave = Math.floor(note / 12);
+            const PAL = ['#FF0000', '#FF7F00', '#FFFF00', '#00FF00', '#0000FF', '#4B0082', '#9400D3', '#FFFFFF', '#FF00FF', '#00FFFF'];
+            return PAL[octave % PAL.length];
+        }
+        if (CFG.colorMode === 'root') return THEMES[CFG.theme].ch[note % 12];
+        return '#fff';
+    }
+
+    // --- MIDI ---
+    async function initMIDI() {
+        const sel = document.getElementById('midi-input');
+        try {
+            midiAccess = await navigator.requestMIDIAccess();
+            midiAccess.onstatechange = refreshInputs;
+            refreshInputs();
+            
+            document.getElementById('btn-manual-init').innerText = "[ SYSTEM ACTIVE ]";
+            document.getElementById('btn-manual-init').style.color = "#00ff41";
+            document.getElementById('btn-manual-init').style.borderColor = "#00ff41";
+        } catch(e) {
+            console.error(e);
+            sel.innerHTML = '<option>ACCESS DENIED</option>';
+            document.getElementById('btn-manual-init').innerText = "[ ACCESS DENIED ]";
+            document.getElementById('btn-manual-init').style.color = "#ff0055";
+        }
+    }
+
+    function refreshInputs() {
+        const sel = document.getElementById('midi-input');
+        
+        const inputs = Array.from(midiAccess.inputs.values());
+        
+        // DO NOT CLEAR IF ALREADY POPULATED TO AVOID FLICKER IF REFRESHING
+        // But we need to update if list changes. Simple approach: wipe and rebuild.
+        sel.innerHTML = '';
+
+        // ADD DEFAULT HEADER
+        const head = document.createElement('option');
+        head.text = "MIDI READY // SELECT INPUT";
+        sel.appendChild(head);
+
+        if(inputs.length===0) {
+            const opt = document.createElement('option');
+            opt.text = "NO DEVICES FOUND";
+            sel.appendChild(opt);
+        } else {
+            inputs.forEach(i => {
+                const o = document.createElement('option'); o.value = i.id; o.text = i.name; sel.appendChild(o);
+            });
+        }
+        if(selectedInputId) sel.value = selectedInputId;
+    }
+
+    document.getElementById('midi-input').addEventListener('change', e => {
+        if(selectedInputId && midiAccess.inputs.has(selectedInputId)) 
+            midiAccess.inputs.get(selectedInputId).onmidimessage = null;
+        selectedInputId = e.target.value;
+        const input = midiAccess.inputs.get(selectedInputId);
+        if(input) input.onmidimessage = handleMsg;
+    });
+
+    function handleMsg(msg) {
+        const [status, d1, d2] = msg.data;
+        const cmd = status >> 4;
+        const ch = status & 0xf;
+
+        if (status === 0xF8) { handleClock(); return; } 
+        if (status === 0xFA) { setTransport('PLAY', '#00ff41'); return; }
+        if (status === 0xFB) { setTransport('CONT', '#ffff00'); return; }
+        if (status === 0xFC) { setTransport('STOP', '#ff0055'); resetClock(); return; }
+        if (status >= 0xF8) return; 
+
+        const now = performance.now();
+
+        if (cmd === 9 && d2 > 0) { // Note On
+            const col = getNoteColor(d1, ch);
+            activeNotes.set(`${ch}-${d1}`, {
+                note: d1, ch, vel: d2, start: now,
+                color: col
+            });
+            flashCh(ch, col); 
+        }
+        else if (cmd === 8 || (cmd === 9 && d2 === 0)) { // Note Off
+            const id = `${ch}-${d1}`;
+            if (activeNotes.has(id)) {
+                const n = activeNotes.get(id);
+                const duration = now - n.start;
+                // Absolute physics
+                const len = CFG.noteSpeed * (duration / 16.66);
+                fallingObjects.push({
+                    type: 'note', note: n.note, 
+                    pos: 0, len: len, 
+                    color: n.color,
+                    timeDropped: now 
+                });
+                activeNotes.delete(id);
+            }
+        }
+        else if (cmd === 11) { // CC
+            handleCC(ch, d1, d2);
+            flashCh(ch, null, true); 
+        }
+    }
+
+    function setTransport(txt, color) {
+        const el = document.getElementById('transport-val');
+        el.innerText = txt;
+        el.style.color = color;
+    }
+    
+    function resetClock() {
+        clockTicks = 0; barTickCounter = 0;
+    }
+
+    function flashCh(ch, color, isCC=false) {
+        const el = chIndicators[ch];
+        if(!el) return;
+        if(isCC) {
+            el.style.backgroundColor = 'var(--data-color)';
+            el.style.color = '#000';
+        } else {
+            el.style.backgroundColor = color;
+            el.style.color = '#000';
+            el.style.boxShadow = `0 0 8px ${color}`;
+        }
+        setTimeout(() => {
+            el.style.backgroundColor = '';
+            el.style.color = '';
+            el.style.boxShadow = '';
+        }, 100);
+    }
+
+    function handleClock() {
+        const now = performance.now();
+        lastActiveClock = now;
+        
+        if (clockTicks % 24 === 0) {
+            const dot = document.getElementById('clock-dot');
+            dot.classList.add('beat');
+            setTimeout(() => dot.classList.remove('beat'), 100);
+        }
+
+        if (lastClockTime > 0) {
+            const delta = now - lastClockTime;
+            if (delta > 2 && delta < 200) {
+                tickHistory.push(delta);
+                if(tickHistory.length > 192) tickHistory.shift(); 
+                if(clockTicks % 24 === 0) {
+                    const avgDelta = tickHistory.reduce((a,b)=>a+b,0) / tickHistory.length;
+                    const bpm = 60000 / (avgDelta * 24);
+                    document.getElementById('bpm-val').innerText = bpm.toFixed(1);
+                }
+            }
+        }
+        lastClockTime = now;
+        
+        // ABSOLUTE GRID DROPPING
+        if (CFG.showBarLines && barTickCounter >= ticksPerBar) {
+            fallingObjects.push({ type: 'grid', pos: 0, isBar: true, timeDropped: now });
+            barTickCounter = 0; 
+        }
+        
+        const beatInterval = DATA.PPQN; 
+        if (CFG.showGrid && clockTicks % beatInterval === 0) {
+            if (barTickCounter !== 0) {
+                fallingObjects.push({ type: 'grid', pos: 0, isBar: false, timeDropped: now });
+            }
+        }
+        
+        clockTicks++;
+        barTickCounter++;
+    }
+
+    function handleCC(ch, cc, val) {
+        const id = `${ch}-${cc}`;
+        let mon = ccMonitors.get(id);
+        const cont = document.getElementById('cc-container');
+        const chColor = THEMES[CFG.theme].ch[ch];
+        const dataColor = getComputedStyle(document.documentElement).getPropertyValue('--data-color');
+        
+        if (!mon) {
+            if(ccMonitors.size === 0) cont.innerHTML = '';
+            const el = document.createElement('div');
+            el.className = 'cc-widget';
+            el.onclick = () => {
+                const n = prompt("LABEL:", mon.label || `CH${ch+1} CC${cc}`);
+                if(n) { 
+                    mon.label = n.toUpperCase();
+                    el.querySelector('.cc-bg-label').innerText = mon.label;
+                    el.querySelector('.cc-name').innerText = mon.label;
+                }
+            };
+            el.innerHTML = `
+                <div class="cc-meta">
+                    <div class="cc-label-row">
+                        <span style="color:${chColor}">CH</span><span>${ch+1}</span>
+                        <span style="color:${chColor}">CC</span><span>${cc}</span>
+                    </div>
+                    <span class="cc-name"></span>
+                </div>
+                <div class="cc-val-big" style="font-size:${CFG.fontSizeCC}px; color:${dataColor}">${val}</div>
+                <div class="cc-graph-container">
+                    <div class="cc-bg-label"></div>
+                    <canvas></canvas>
+                </div>
+            `;
+            cont.insertBefore(el, cont.firstChild);
+            
+            const cvs = el.querySelector('canvas');
+            cvs.width = 150; cvs.height = 30;
+            
+            mon = {
+                val: val, 
+                history: [], // {val, time}
+                element: el,
+                valEl: el.querySelector('.cc-val-big'),
+                ctx: cvs.getContext('2d'),
+                w: 150, h: 30,
+                color: chColor,
+                lastUpdate: Date.now(),
+                label: ''
+            };
+            ccMonitors.set(id, mon);
+             mon.history.push({val:val, time: performance.now()});
+        } else {
+            mon.val = val;
+            mon.lastUpdate = Date.now();
+            mon.valEl.innerText = val;
+            mon.color = chColor; 
+            mon.valEl.style.color = dataColor;
+            
+            // Update label colors
+            const rows = mon.element.querySelector('.cc-label-row').children;
+            rows[0].style.color = chColor;
+            rows[2].style.color = chColor;
+
+            mon.history.push({val:val, time: performance.now()});
+        }
+    }
+
+    window.resetCCData = function() {
+        ccMonitors.forEach(mon => {
+            mon.history = []; 
+        });
+    }
+    
+    function drawCCs(now) {
+        ccMonitors.forEach(mon => {
+            const ctx = mon.ctx;
+            const w = mon.w;
+            const h = mon.h;
+            
+            ctx.clearRect(0,0,w,h);
+            ctx.strokeStyle = mon.color;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            
+            const windowSize = 5000; 
+            const startTime = now - windowSize;
+            
+            while(mon.history.length > 0 && mon.history[0].time < startTime) {
+                mon.history.shift();
+            }
+            
+            if(mon.history.length > 0) {
+                // Add current point for flatline effect
+                const renderPoints = [...mon.history, {val: mon.val, time: now}];
+                
+                renderPoints.forEach((p, i) => {
+                    let x;
+                    if (CFG.ccScrollDir === 'left') {
+                        x = ((p.time - startTime) / windowSize) * w;
+                    } else {
+                        x = w - ((p.time - startTime) / windowSize) * w;
+                    }
+                    const y = h - ((p.val / 127) * h);
+                    if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+                });
+                ctx.stroke();
+            }
+        });
+    }
+
+    function drawNoteShape(ctx, x, y, w, h, type) {
+        if (type === 'bar') {
+            ctx.fillRect(x, y, w, h);
+        } else if (type === 'bubble') {
+            ctx.beginPath();
+            const r = w/2;
+            ctx.arc(x+r, y+r, r, Math.PI, 0); 
+            ctx.arc(x+r, y+h-r, r, 0, Math.PI); 
+            ctx.rect(x, y+r, w, h-2*r);
+            ctx.fill();
+        } else if (type === 'tear') {
+            ctx.beginPath();
+            if (CFG.direction === 'down' || CFG.direction === 'right') {
+                 ctx.moveTo(x, y); 
+                 ctx.lineTo(x+w, y);
+                 ctx.lineTo(x+w/2, y+h); 
+                 ctx.fill();
+            } else {
+                 ctx.moveTo(x+w/2, y); 
+                 ctx.lineTo(x+w, y+h);
+                 ctx.lineTo(x, y+h);
+                 ctx.fill();
+            }
+        } else if (type === 'hex') {
+             ctx.beginPath();
+             ctx.moveTo(x, y + h*0.2);
+             ctx.lineTo(x + w/2, y);
+             ctx.lineTo(x + w, y + h*0.2);
+             ctx.lineTo(x + w, y + h*0.8);
+             ctx.lineTo(x + w/2, y + h);
+             ctx.lineTo(x, y + h*0.8);
+             ctx.fill();
+        } else {
+             ctx.fillRect(x, y, w, h);
+        }
+    }
+
+    // --- RENDER ---
+    function loop() {
+        requestAnimationFrame(loop);
+        
+        const now = performance.now();
+        const dt = now - lastFrameTime;
+        lastFrameTime = now;
+        const sync = dt / 16.66;
+        
+        // 1. SCROLL CC GRAPHS
+        drawCCs(now);
+
+        if (now - lastActiveClock > 2000 && lastActiveClock !== 0) {
+            document.getElementById('bpm-val').innerText = "NO CLOCK";
+            lastActiveClock = 0; 
+        }
+
+        const visKeys = 128 / CFG.zoom;
+        const maxStart = 128 - visKeys;
+        const startKey = (CFG.pan / 100) * maxStart;
+        const endKey = startKey + visKeys;
+        const keyW = mainCanvas.width / visKeys;
+        
+        // 2. DRAW BACKGROUND
+        mainCtx.save();
+        if (CFG.persistence > 0) {
+            // Instead of fading with BG color, fade with black alpha
+            const bg = getComputedStyle(document.body).getPropertyValue('--bg-color');
+            mainCtx.globalAlpha = (1 - CFG.persistence);
+            mainCtx.fillStyle = bg;
+            mainCtx.fillRect(0,0,mainCanvas.width, mainCanvas.height);
+            mainCtx.globalAlpha = 1.0;
+        } else {
+            mainCtx.clearRect(0,0,mainCanvas.width, mainCanvas.height);
+            const bg = getComputedStyle(document.body).getPropertyValue('--bg-color');
+            mainCtx.fillStyle = bg;
+            mainCtx.fillRect(0,0,mainCanvas.width, mainCanvas.height);
+        }
+        mainCtx.restore();
+
+        // OVERLAY CANVAS: GRID LINES (Clear fully)
+        overlayCtx.clearRect(0,0,overlayCanvas.width, overlayCanvas.height);
+
+        const isVertical = (CFG.direction === 'down' || CFG.direction === 'up');
+
+        if (isVertical) {
+            drawVertical(startKey, endKey, visKeys, sync, now);
+        } else {
+            drawHorizontal(startKey, endKey, visKeys, sync, now);
+        }
+    }
+
+    function drawVertical(startKey, endKey, visKeys, sync, now) {
+        const keyW = mainCanvas.width / visKeys;
+        
+        // DRAW GRID ON OVERLAY (SHARP)
+        if(CFG.showGrid || CFG.showCLines) {
+             overlayCtx.save(); overlayCtx.shadowBlur=0;
+             for(let i=Math.floor(startKey); i<endKey; i++) {
+                const x = Math.floor((i-startKey)*keyW);
+                const isBlack = CONFIG.BLACK_KEYS.includes(i%12);
+                
+                if(CFG.showGrid) {
+                    overlayCtx.fillStyle = isBlack ? 'rgba(255,255,255,0.02)' : 'transparent';
+                    overlayCtx.fillRect(x, 0, Math.ceil(keyW), mainCanvas.height);
+                    overlayCtx.strokeStyle = 'rgba(255,255,255,0.04)';
+                    overlayCtx.beginPath(); overlayCtx.moveTo(x,0); overlayCtx.lineTo(x,mainCanvas.height); overlayCtx.stroke();
+                }
+                
+                if(CFG.showCLines && i%12===0) {
+                    overlayCtx.strokeStyle = 'rgba(255,255,255,0.15)';
+                    overlayCtx.lineWidth = 1;
+                    overlayCtx.beginPath(); overlayCtx.moveTo(x,0); overlayCtx.lineTo(x,mainCanvas.height); overlayCtx.stroke();
+                    
+                    // Label logic - Show at bottom if piano hidden
+                    if (!CFG.showPiano) {
+                        overlayCtx.fillStyle = 'rgba(255,255,255,0.5)';
+                        overlayCtx.font = `bold ${CFG.fontSizeLbl}px monospace`;
+                        const lblY = (CFG.direction === 'down') ? mainCanvas.height - 10 : 20;
+                        overlayCtx.fillText("C"+(Math.floor(i/12)-1), x+4, lblY);
+                    }
+                }
+             }
+             overlayCtx.restore();
+        }
+
+        // FALLING
+        for(let i=fallingObjects.length-1; i>=0; i--) {
+            const o = fallingObjects[i];
+            const age = now - o.timeDropped;
+            o.pos = CFG.noteSpeed * (age / 16.66);
+            
+            if(o.pos > mainCanvas.height + o.len) { fallingObjects.splice(i,1); continue; }
+
+            if(o.type === 'grid') {
+                // DRAW BAR LINES ON OVERLAY
+                overlayCtx.save(); overlayCtx.shadowBlur = 0;
+                overlayCtx.strokeStyle = o.isBar ? getComputedStyle(document.body).getPropertyValue('--grid-bar') : getComputedStyle(document.body).getPropertyValue('--grid-beat');
+                overlayCtx.lineWidth = o.isBar ? CFG.barThick : 1;
+                overlayCtx.beginPath();
+                
+                if (CFG.direction === 'down') {
+                    overlayCtx.moveTo(0, o.pos); overlayCtx.lineTo(mainCanvas.width, o.pos);
+                } else { 
+                    const y = mainCanvas.height - o.pos;
+                    overlayCtx.moveTo(0, y); overlayCtx.lineTo(mainCanvas.width, y);
+                }
+                overlayCtx.stroke();
+                overlayCtx.restore();
+            }
+            else if(o.type === 'note') {
+                if(o.note < startKey || o.note >= endKey) continue;
+                const thickW = keyW * (CFG.noteThickness / 100);
+                const thickOffset = (keyW - thickW) / 2;
+                const x = Math.floor((o.note - startKey)*keyW) + thickOffset;
+                
+                mainCtx.save();
+                if(CFG.glow && CFG.glowAmt > 0) {
+                    mainCtx.shadowColor = (CFG.theme === 'chernobyl') ? '#00FFFF' : o.color;
+                    mainCtx.shadowBlur = CFG.glowAmt;
+                }
+                mainCtx.fillStyle = o.color;
+                
+                let ry = (CFG.direction === 'down') ? o.pos - o.len : mainCanvas.height - o.pos;
+                drawNoteShape(mainCtx, x, ry, Math.ceil(thickW), o.len, CFG.noteShape);
+                mainCtx.restore();
+                
+                if(CFG.showLabels && keyW > 15) {
+                    // Labels on OVERLAY
+                    overlayCtx.save(); overlayCtx.shadowBlur=3; overlayCtx.shadowColor='#000'; overlayCtx.fillStyle='#fff'; 
+                    overlayCtx.font=`bold ${CFG.fontSizeLbl}px monospace`; 
+                    overlayCtx.fillText(CONFIG.NOTE_NAMES[o.note%12], x+2, (CFG.direction==='down' ? o.pos-5 : mainCanvas.height - o.pos + o.len - 5));
+                    overlayCtx.restore();
+                }
+            }
+        }
+
+        // ACTIVE
+        activeNotes.forEach(n => {
+            if(n.note < startKey || n.note >= endKey) return;
+            const thickW = keyW * (CFG.noteThickness / 100);
+            const thickOffset = (keyW - thickW) / 2;
+            const x = Math.floor((n.note - startKey)*keyW) + thickOffset;
+            
+            const duration = performance.now() - n.start;
+            const len = CFG.noteSpeed * (duration / 16.66);
+            
+            mainCtx.save();
+            if(CFG.glow && CFG.glowAmt > 0) {
+                mainCtx.shadowColor = (CFG.theme === 'chernobyl') ? '#00FFFF' : n.color;
+                mainCtx.shadowBlur = CFG.glowAmt;
+            }
+            mainCtx.fillStyle = n.color;
+            
+            let ry = (CFG.direction === 'down') ? 0 : mainCanvas.height - len;
+            drawNoteShape(mainCtx, x, ry, Math.ceil(thickW), len, CFG.noteShape);
+            mainCtx.restore();
+            
+            if(CFG.showLabels && keyW > 15) {
+                overlayCtx.save(); overlayCtx.shadowBlur=3; overlayCtx.shadowColor='#000'; overlayCtx.fillStyle='#fff'; 
+                overlayCtx.font=`bold ${CFG.fontSizeLbl}px monospace`;
+                overlayCtx.fillText(CONFIG.NOTE_NAMES[n.note%12], x+2, (CFG.direction==='down' ? len-5 : mainCanvas.height - 5));
+                overlayCtx.restore();
+            }
+        });
+
+        // PIANO & C-LINES (OVERLAY)
+        if(CFG.showPiano) {
+            // Draw Piano on Piano Canvas (Always on top via CSS)
+            pianoCtx.fillStyle = getComputedStyle(document.body).getPropertyValue('--panel-bg');
+            pianoCtx.fillRect(0,0, pianoCanvas.width, pianoCanvas.height);
+            
+            for(let i=Math.floor(startKey); i<endKey; i++) {
+                const x = Math.floor((i-startKey)*keyW);
+                const w = Math.ceil(keyW);
+                const isBlack = CONFIG.BLACK_KEYS.includes(i%12);
+                const noteName = CONFIG.NOTE_NAMES[i%12];
+                
+                pianoCtx.fillStyle = isBlack ? '#222' : '#888';
+                pianoCtx.fillRect(x, isBlack?0:10, w-1, isBlack?18:20);
+                
+                // Smart C-Label on Overlay under Piano
+                if(noteName === "C") {
+                    // We draw the text on the OVERLAY canvas so it floats
+                    overlayCtx.save();
+                    overlayCtx.fillStyle = '#fff';
+                    overlayCtx.font = `bold ${CFG.fontSizeLbl}px monospace`;
+                    const octave = Math.floor(i/12) - 1;
+                    const lblY = (CFG.direction === 'down') ? 26 : 12;
+                    // Piano canvas is separate, so we need to draw text there? No, Overlay covers all.
+                    // But piano roll is in a separate div... 
+                    // Actually Piano Roll Header is its own canvas. Draw there.
+                    pianoCtx.fillStyle = '#fff';
+                    pianoCtx.font = `bold ${CFG.fontSizeLbl}px monospace`;
+                    pianoCtx.fillText("C"+octave, x+2, 26);
+                    overlayCtx.restore();
+                }
+            }
+        }
+    }
+
+    function drawHorizontal(startKey, endKey, visKeys, sync, now) {
+        const keyH = mainCanvas.height / visKeys;
+        
+        // GRID OVERLAY
+        if(CFG.showGrid || CFG.showCLines) {
+             overlayCtx.save(); overlayCtx.shadowBlur=0;
+             for(let i=Math.floor(startKey); i<endKey; i++) {
+                const y = mainCanvas.height - (i - startKey + 1) * keyH;
+                const h = Math.ceil(keyH);
+                const isBlack = CONFIG.BLACK_KEYS.includes(i%12);
+                
+                if(CFG.showGrid) {
+                    overlayCtx.fillStyle = isBlack ? 'rgba(255,255,255,0.02)' : 'transparent';
+                    overlayCtx.fillRect(0, y, mainCanvas.width, h);
+                    overlayCtx.strokeStyle = 'rgba(255,255,255,0.04)';
+                    overlayCtx.beginPath(); overlayCtx.moveTo(0,y+h); overlayCtx.lineTo(mainCanvas.width,y+h); overlayCtx.stroke();
+                }
+                if(CFG.showCLines && i%12===0) {
+                    overlayCtx.strokeStyle = 'rgba(255,255,255,0.15)';
+                    overlayCtx.beginPath(); overlayCtx.moveTo(0,y+h); overlayCtx.lineTo(mainCanvas.width,y+h); overlayCtx.stroke();
+                    if(!CFG.showPiano) {
+                        overlayCtx.fillStyle = 'rgba(255,255,255,0.5)';
+                        overlayCtx.font = `bold ${CFG.fontSizeLbl}px monospace`;
+                        const lblX = (CFG.direction === 'right') ? 10 : mainCanvas.width - 30;
+                        overlayCtx.fillText("C"+(Math.floor(i/12)-1), lblX, y + h - 5);
+                    }
+                }
+             }
+             overlayCtx.restore();
+        }
+
+        // FALLING
+        for(let i=fallingObjects.length-1; i>=0; i--) {
+            const o = fallingObjects[i];
+            const age = now - o.timeDropped;
+            o.pos = CFG.noteSpeed * (age / 16.66);
+
+            if(o.pos > mainCanvas.width + o.len) { fallingObjects.splice(i,1); continue; }
+
+            if(o.type === 'grid') {
+                overlayCtx.save(); overlayCtx.shadowBlur = 0;
+                overlayCtx.strokeStyle = o.isBar ? getComputedStyle(document.body).getPropertyValue('--grid-bar') : getComputedStyle(document.body).getPropertyValue('--grid-beat');
+                overlayCtx.lineWidth = o.isBar ? CFG.barThick : 1;
+                overlayCtx.beginPath();
+                
+                if (CFG.direction === 'right') {
+                    overlayCtx.moveTo(o.pos, 0); overlayCtx.lineTo(o.pos, mainCanvas.height);
+                } else { 
+                    const x = mainCanvas.width - o.pos;
+                    overlayCtx.moveTo(x, 0); overlayCtx.lineTo(x, mainCanvas.height);
+                }
+                overlayCtx.stroke();
+                overlayCtx.restore();
+            }
+            else if(o.type === 'note') {
+                if(o.note < startKey || o.note >= endKey) continue;
+                
+                const thickH = keyH * (CFG.noteThickness / 100);
+                const thickOffset = (keyH - thickH) / 2;
+                const y = mainCanvas.height - (o.note - startKey + 1) * keyH + thickOffset;
+                
+                mainCtx.save();
+                if(CFG.glow && CFG.glowAmt > 0) {
+                    mainCtx.shadowColor = (CFG.theme === 'chernobyl') ? '#00FFFF' : o.color;
+                    mainCtx.shadowBlur = CFG.glowAmt;
+                }
+                mainCtx.fillStyle = o.color;
+                
+                let rx = (CFG.direction === 'right') ? o.pos - o.len : mainCanvas.width - o.pos;
+                drawNoteShape(mainCtx, rx, y, o.len, Math.ceil(thickH), CFG.noteShape);
+                mainCtx.restore();
+                
+                if(CFG.showLabels && keyH > 15) {
+                    overlayCtx.save(); overlayCtx.shadowBlur=2; overlayCtx.shadowColor='#000';
+                    overlayCtx.fillStyle='#fff'; 
+                    overlayCtx.font=`bold ${CFG.fontSizeLbl}px monospace`;
+                    overlayCtx.fillText(CONFIG.NOTE_NAMES[o.note%12], (CFG.direction==='right' ? o.pos-12 : mainCanvas.width - o.pos + o.len - 12), y + keyH/2 + 4);
+                    overlayCtx.restore();
+                }
+            }
+        }
+
+        // ACTIVE
+        activeNotes.forEach(n => {
+            if(n.note < startKey || n.note >= endKey) return;
+            const thickH = keyH * (CFG.noteThickness / 100);
+            const thickOffset = (keyH - thickH) / 2;
+            const y = mainCanvas.height - (n.note - startKey + 1) * keyH + thickOffset;
+            const duration = performance.now() - n.start;
+            const len = CFG.noteSpeed * (duration / 16.66);
+            
+            mainCtx.save();
+            if(CFG.glow && CFG.glowAmt > 0) {
+                mainCtx.shadowColor = (CFG.theme === 'chernobyl') ? '#00FFFF' : n.color;
+                mainCtx.shadowBlur = CFG.glowAmt;
+            }
+            mainCtx.fillStyle = n.color;
+            
+            let rx = (CFG.direction === 'right') ? 0 : mainCanvas.width - len;
+            drawNoteShape(mainCtx, rx, y, len, Math.ceil(thickH), CFG.noteShape);
+            mainCtx.restore();
+            
+            if(CFG.showLabels && keyH > 15) {
+                overlayCtx.save(); overlayCtx.shadowBlur=2; overlayCtx.shadowColor='#000';
+                overlayCtx.fillStyle='#fff'; 
+                overlayCtx.font=`bold ${CFG.fontSizeLbl}px monospace`;
+                overlayCtx.fillText(CONFIG.NOTE_NAMES[n.note%12], (CFG.direction==='right' ? 5 : mainCanvas.width - 15), y + keyH/2 + 4);
+                overlayCtx.restore();
+            }
+        });
+
+        // PIANO (Side)
+        if(CFG.showPiano) {
+            pianoCtx.fillStyle = getComputedStyle(document.body).getPropertyValue('--panel-bg');
+            pianoCtx.fillRect(0,0, pianoCanvas.width, pianoCanvas.height);
+            
+            for(let i=Math.floor(startKey); i<endKey; i++) {
+                const y = mainCanvas.height - (i - startKey + 1) * keyH;
+                const h = Math.ceil(keyH);
+                const isBlack = CONFIG.BLACK_KEYS.includes(i%12);
+                const noteName = CONFIG.NOTE_NAMES[i%12];
+                
+                pianoCtx.fillStyle = isBlack ? '#222' : '#888';
+                pianoCtx.fillRect(isBlack?0:0, y, isBlack?20:38, h-1);
+                
+                if(noteName === "C") {
+                    pianoCtx.fillStyle = '#fff';
+                    pianoCtx.font = `bold ${CFG.fontSizeLbl}px monospace`;
+                    const octave = Math.floor(i/12) - 1;
+                    const lblX = (CFG.direction === 'right') ? 5 : 22;
+                    pianoCtx.fillText("C"+octave, lblX, y + h - 4);
+                }
+            }
+        }
+    }
+</script>
+</body>
+</html>
