@@ -50,9 +50,9 @@
             transition: background 0.3s, border 0.3s;
         }
 
-        h1 { 
-            margin: 0; font-size: calc(var(--font-size-base) * 1.4); letter-spacing: 3px; 
-            color: var(--accent-color); font-weight: 700; white-space: nowrap; 
+        h1 {
+            margin: 0; font-size: calc(var(--font-size-base) * 1.4); letter-spacing: 3px;
+            color: var(--accent-color); font-weight: 700; white-space: nowrap;
             text-transform: uppercase;
         }
 
@@ -67,7 +67,7 @@
         }
         /* Fix Dropdown Border Color */
         select { border-color: var(--text-color); }
-        
+
         button:hover, select:hover { background: #222; border-color: var(--text-color); }
         button.active { background: var(--text-color); color: #000; font-weight: bold; box-shadow: 0 0 10px var(--text-color); }
         button.icon-btn { font-size: calc(var(--font-size-base) * 1.2); padding: 2px 8px; }
@@ -98,12 +98,12 @@
             max-height: calc(100vh - 60px); overflow-y: auto;
         }
         #settings-panel.open { display: grid; }
-        
+
         .setting-col { display: flex; flex-direction: column; gap: 8px; }
         .setting-col h3 { margin: 0 0 5px 0; font-size: var(--font-size-base); color: var(--accent-color); border-bottom: 1px solid #333; padding-bottom: 2px;}
         .setting-row { display: flex; justify-content: space-between; align-items: center; }
         .setting-row label { font-size: calc(var(--font-size-base) * 0.9); color: #aaa; }
-        
+
         .sig-inputs { display: flex; gap: 5px; align-items: center; }
         .sig-inputs input { width: 40px; text-align: center; }
 
@@ -112,17 +112,17 @@
             display: flex; flex-grow: 1; height: calc(100vh - 50px); position: relative;
             overflow: hidden;
             /* Default: Sidebar on Right */
-            flex-direction: row; 
+            flex-direction: row;
         }
         .workspace.sidebar-bottom { flex-direction: column; }
 
         /* VISUALIZER WRAPPER */
         .vis-wrapper {
-            flex-grow: 1; position: relative; display: flex; 
+            flex-grow: 1; position: relative; display: flex;
             overflow: hidden; background: #000;
             flex-direction: column; /* Default Vertical */
         }
-        
+
         /* Directional Layouts */
         .workspace.dir-down .vis-wrapper { flex-direction: column; }
         .workspace.dir-up .vis-wrapper { flex-direction: column-reverse; }
@@ -131,7 +131,7 @@
 
         /* PIANO ROLL */
         #piano-roll-header {
-            background: var(--panel-bg); flex-shrink: 0; display: none; 
+            background: var(--panel-bg); flex-shrink: 0; display: none;
             border-style: solid; border-color: #333; border-width: 0;
         }
         #piano-roll-header.visible { display: block; }
@@ -151,33 +151,60 @@
             display: none; flex-direction: column; flex-shrink: 0; z-index: 15; position: relative;
         }
         #sidebar.visible { display: flex; }
-        
+
         .workspace:not(.sidebar-bottom) #sidebar { width: 300px; border-left-width: 2px; }
         .workspace.sidebar-bottom #sidebar { height: 200px; width: 100%; border-top-width: 2px; }
-        
+
         .resizer { position: absolute; z-index: 20; background: rgba(255,255,255,0.05); }
         .resizer:hover { background: var(--accent-color); }
-        
+
         .workspace:not(.sidebar-bottom) .resizer { width: 5px; cursor: col-resize; left: 0; top: 0; bottom: 0; }
         .workspace.sidebar-bottom .resizer { height: 5px; cursor: row-resize; top: 0; left: 0; right: 0; }
 
         .sidebar-header {
-            padding: 8px; background: rgba(0,0,0,0.2); font-weight: 700; 
+            padding: 8px; background: rgba(0,0,0,0.2); font-weight: 700;
             border-bottom: 1px solid #333; letter-spacing: 1px;
             display: flex; justify-content: space-between; align-items: center;
+        }
+
+        #big-cc-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .workspace.sidebar-bottom #big-cc-controls {
+            flex-direction: column;
+            position: absolute;
+            right: 10px;
+            top: 60px;
+        }
+
+        .workspace.sidebar-bottom #big-cc-controls input[type=range] {
+            writing-mode: bt-lr; /* IE */
+            -webkit-appearance: slider-vertical; /* WebKit */
+            width: 8px;
+            height: 100px;
+            padding: 0 5px;
+        }
+
+        #big-cc-scale-value {
+            font-size: 12px;
+            color: var(--data-color);
+            font-family: monospace;
         }
 
         .sidebar-content {
             flex-grow: 1; overflow-y: auto; padding: 5px;
             display: flex; flex-direction: column; gap: 4px;
         }
-        
+
         /* Bottom Layout for Sidebar */
         .workspace.sidebar-bottom .sidebar-content {
             flex-direction: row; flex-wrap: wrap; align-content: flex-start;
             overflow-x: auto; /* Allow scroll if needed */
         }
-        
+
         /* CC WIDGETS */
         .cc-widget {
             background: rgba(0,0,0,0.3); border: 1px solid #333; padding: 0 5px;
@@ -188,32 +215,32 @@
         }
         .cc-widget.hidden { display: none; }
         @keyframes flashCC { from { background: #222; } to { background: rgba(0,0,0,0.3); } }
-        
+
         .cc-meta { width: 70px; display: flex; flex-direction: column; gap: 2px; pointer-events: none; }
         .cc-label { font-size: calc(var(--font-size-base) * 0.7); color: #666; }
         .cc-name { font-size: calc(var(--font-size-base) * 0.8); font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .cc-val-big { 
+        .cc-val-big {
             font-size: calc(var(--font-size-base) * 1.1); color: var(--data-color); font-weight: 700; font-family: monospace;
             width: 35px; text-align: right; flex-shrink: 0; /* Jitter Fix */
         }
-        .cc-graph-container { 
-            flex-grow: 1; height: 30px; background: #000; border: 1px solid #222; position: relative; 
+        .cc-graph-container {
+            flex-grow: 1; height: 30px; background: #000; border: 1px solid #222; position: relative;
             cursor: pointer; /* Click to rename */
             min-width: 50px; /* Prevent total collapse */
         }
-        
+
         /* Bottom Layout Fixed Width Graphs */
         .workspace.sidebar-bottom .cc-graph-container {
             width: var(--cc-graph-width, 150px);
             flex-grow: 0; flex-shrink: 0;
         }
-        
-        .cc-bg-label { 
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
-            font-size: 20px; color: rgba(255,255,255,0.1); font-weight: 900; pointer-events: none; 
+
+        .cc-bg-label {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            font-size: 20px; color: rgba(255,255,255,0.1); font-weight: 900; pointer-events: none;
             white-space: nowrap;
         }
-        
+
         .cc-pin-btn {
             width: 12px; height: 12px; border: 1px solid #666; border-radius: 50%;
             cursor: pointer; margin-left: auto;
@@ -221,7 +248,7 @@
         .cc-pin-btn.active { background: var(--accent-color); border-color: var(--accent-color); box-shadow: 0 0 5px var(--accent-color); }
 
         /* CHANNEL MATRIX */
-        .ch-matrix { display: grid; grid-template-columns: repeat(8, 1fr); gap: 2px; width: 200px; display: none; } 
+        .ch-matrix { display: grid; grid-template-columns: repeat(8, 1fr); gap: 2px; width: 200px; display: none; }
         .ch-matrix.visible { display: grid; }
         .ch-led {
             height: 14px; background: #111; border: 1px solid #333;
@@ -252,7 +279,7 @@
 <header>
     <div class="header-left">
         <h1 id="app-title">MK XX</h1>
-        
+
         <div class="control-group">
             <select id="midi-input" style="min-width: 150px;"><option>INIT SYSTEMS...</option></select>
         </div>
@@ -285,7 +312,7 @@
             <label>POS</label>
             <input type="range" id="pan-slider" min="0" max="100" step="1" value="30">
         </div>
-        
+
         <button id="btn-settings" class="icon-btn" style="font-size: 20px;">&#9881;</button>
     </div>
 </header>
@@ -455,7 +482,7 @@
             <button id="btn-load-db" style="width: 48%;">LOAD DB</button>
             <input type="file" id="db-input" style="display:none" accept=".json">
         </div>
-        
+
         <h3>FLIGHT DATA</h3>
         <div class="setting-row"><label>SHOW PGM</label><input type="checkbox" id="chk-show-pgm" checked></div>
         <div class="setting-row"><label>TIME SIG</label>
@@ -479,7 +506,7 @@
         <div class="setting-row"><label>SHOW GRID</label><input type="checkbox" id="chk-grid" checked></div>
         <div class="setting-row"><label>SHOW BARS</label><input type="checkbox" id="chk-bar" checked></div>
         <div class="setting-row"><label>SHOW C-LINES</label><input type="checkbox" id="chk-clines"></div>
-        
+
         <h3>NOTE CHANNELS</h3>
         <div class="ch-filter-grid" id="ch-filter-container-notes" style="display: grid; grid-template-columns: repeat(8, 1fr); gap: 2px;"></div>
         <h3>CC CHANNELS</h3>
@@ -488,7 +515,7 @@
 </div>
 
 <div class="workspace dir-down" id="main-workspace">
-    
+
     <div class="vis-wrapper" id="vis-wrapper">
         <div id="piano-roll-header" class="visible">
             <canvas id="pianoCanvas"></canvas>
@@ -506,6 +533,25 @@
             <div style="display:flex; flex-direction:column;">
                 <span>CC FLIGHT RECORDER</span>
                 <span style="font-size:9px; color:#666; font-weight:normal;">R-CLICK HIDE / DRAG OVL</span>
+            </div>
+            <div id="big-cc-controls" style="display:none;">
+                <div class="range-wrap">
+                    <label>Graph Scale</label>
+                    <input type="range" id="big-cc-scale-slider" min="0.1" max="1" step="0.05" value="0.5">
+                </div>
+                <span id="big-cc-scale-value">50%</span>
+                <div class="range-wrap">
+                    <label>Grid Lines</label>
+                    <input type="checkbox" id="chk-cc-grid">
+                </div>
+                <div class="range-wrap">
+                    <label>Grid Steps</label>
+                    <input type="range" id="cc-grid-steps-slider" min="1" max="8" step="1" value="1">
+                </div>
+                <div class="range-wrap">
+                    <label>Custom Grid</label>
+                    <input type="text" id="cc-grid-custom-input" style="width: 100px;">
+                </div>
             </div>
             <div style="display:flex; gap:2px;">
                 <button class="icon-btn" onclick="resetCCFilters()" title="Show All">ALL</button>
@@ -553,13 +599,13 @@
     // --- STATE ---
     let midiAccess = null;
     let selectedInputId = null;
-    
+
     let currentFontStack = "'Rajdhani', sans-serif";
     let currentTheme = 'matrix';
     let noteSpeed = 4;
     let zoomLevel = 1;
     let panPercent = 30;
-    let colorMode = 'channel'; 
+    let colorMode = 'channel';
     let ccColorMode = 'match';
     let ccTimeout = 0;
     let showLabels = false;
@@ -573,7 +619,7 @@
     let ccOpacity = 0.6;
     let direction = 'down';
     let persistence = 0;
-    let noteThickness = 100; 
+    let noteThickness = 100;
     let noteShape = 'bar';
     let fontSizeCC = 14;
     let ccScrollDir = 'left';
@@ -584,7 +630,7 @@
     let hiddenCCs = new Set();
     let randomPaletteNotes = [];
     let randomPaletteCC = [];
-    
+
     // New Features State
     let showPGM = true;
     let freshPGM = false;
@@ -596,6 +642,10 @@
     let overlayThick = 3;
     let overlayTrails = false;
     let ccScale = 150;
+    let bigCcGraphScale = 0.5;
+    let showCcGrid = false;
+    let ccGridSteps = 1;
+    let ccGridCustom = "";
 
     let sigNum = 4;
     let sigDen = 4;
@@ -604,28 +654,28 @@
 
     // Data
     const activeNotes = new Map();
-    const fallingObjects = []; 
+    const fallingObjects = [];
     const ccMonitors = new Map();
     const chIndicators = [];
     const persistentLabels = new Map(); // Fix Label Loss
     const labeledPitches = new Set(); // Global for "Label Per Bar"
-    
+
     // Clock
     let clockTicks = 0;
     let lastClockTime = 0;
-    let tickHistory = []; 
+    let tickHistory = [];
     let lastActiveClock = 0;
     let ticksPerBar = 96;
-    let barTickCounter = 0; 
+    let barTickCounter = 0;
 
     const mainCanvas = document.getElementById('mainCanvas');
     const overlayCanvas = document.getElementById('overlayCanvas');
     const pianoCanvas = document.getElementById('pianoCanvas');
-    const mainCtx = mainCanvas.getContext('2d', { alpha: true }); 
+    const mainCtx = mainCanvas.getContext('2d', { alpha: true });
     const overlayCtx = overlayCanvas.getContext('2d', { alpha: true });
     const pianoCtx = pianoCanvas.getContext('2d', { alpha: false });
     const chContainer = document.getElementById('ch-matrix');
-    
+
     function init() {
         shuffleColors(randomPaletteNotes);
         shuffleColors(randomPaletteCC);
@@ -634,12 +684,12 @@
         setupChannelFilters('ch-filter-container-cc', channelMaskCC);
         setupEventListeners();
         applyTheme('matrix');
-        updateTimeSig(); 
+        updateTimeSig();
         updateFont('tech'); // Default to DIN/Tech
         resize();
         window.addEventListener('resize', resize);
         initMIDI();
-        
+
         setInterval(cleanupCCs, 1000);
         requestAnimationFrame(loop);
     }
@@ -671,11 +721,11 @@
         for(let i=0; i<16; i++) {
             const wrap = document.createElement('div');
             wrap.style.display = 'flex'; wrap.style.alignItems='center'; wrap.style.gap='2px';
-            const cb = document.createElement('input'); 
+            const cb = document.createElement('input');
             cb.type = 'checkbox'; cb.checked = true;
             cb.id = `${containerId}-mask-${i}`;
             cb.addEventListener('change', e => maskArray[i] = e.target.checked);
-            const lbl = document.createElement('span'); 
+            const lbl = document.createElement('span');
             lbl.innerText = (i+1); lbl.style.fontSize='10px'; lbl.style.color='#666';
             wrap.appendChild(cb); wrap.appendChild(lbl);
             cont.appendChild(wrap);
@@ -698,7 +748,7 @@
 
     function cleanupCCs() {
         if (ccTimeout === 0) return;
-        const now = performance.now(); 
+        const now = performance.now();
         ccMonitors.forEach((mon, id) => {
             if (mon.pinned) return; // Ignore pinned
             if (now - mon.lastUpdate > ccTimeout) {
@@ -720,22 +770,22 @@
 
         safeListen('zoom-slider', 'input', e => zoomLevel = parseFloat(e.target.value));
         safeListen('pan-slider', 'input', e => panPercent = parseFloat(e.target.value));
-        
+
         safeListen('btn-settings', 'click', e => {
             const p = document.getElementById('settings-panel');
             if(p) p.classList.toggle('open');
             e.target.classList.toggle('active');
         });
-        
+
         safeListen('btn-manual-init', 'click', initMIDI);
-        
+
         safeListen('btn-toggle-cc', 'click', e => {
             const chk = document.getElementById('chk-cc-panel');
             chk.checked = !chk.checked;
             chk.dispatchEvent(new Event('change'));
             e.target.classList.toggle('active');
         });
-        
+
         safeListen('btn-toggle-pgm', 'click', e => {
              const chk = document.getElementById('chk-show-pgm');
              chk.checked = !chk.checked;
@@ -749,7 +799,7 @@
         safeListen('btn-save-cfg', 'click', saveConfig);
         safeListen('btn-load-cfg', 'click', () => document.getElementById('file-input').click());
         safeListen('file-input', 'change', loadConfig);
-        
+
         safeListen('btn-save-db', 'click', saveCCDatabase);
         safeListen('btn-load-db', 'click', () => document.getElementById('db-input').click());
         safeListen('db-input', 'change', loadCCDatabase);
@@ -759,7 +809,7 @@
              const bpmBox = document.getElementById('bpm-box');
              const transDiv = document.getElementById('transport-div');
              const transVal = document.getElementById('transport-val');
-             
+
              if(v) {
                  bpmBox.style.display = 'flex';
                  transDiv.style.display = 'block';
@@ -769,15 +819,15 @@
                  bpmBox.style.display = 'none';
                  transDiv.style.display = 'none';
                  transVal.style.display = 'none';
-                 document.getElementById('status-box').style.display = 'none'; 
+                 document.getElementById('status-box').style.display = 'none';
              }
         });
         toggle('chk-matrix', v => document.getElementById('ch-matrix').classList.toggle('visible', v));
         toggle('chk-piano', v => { showPiano = v; document.getElementById('piano-roll-header').classList.toggle('visible', v); resize(); });
         toggle('chk-grid', v => showGrid = v);
         toggle('chk-bar', v => showBarLines = v);
-        toggle('chk-labels', v => { 
-            showLabels = v; 
+        toggle('chk-labels', v => {
+            showLabels = v;
             const btn = document.getElementById('btn-labels');
             if(btn) if(v) btn.classList.add('active'); else btn.classList.remove('active');
         });
@@ -788,7 +838,7 @@
             if(v) btn.classList.add('active'); else btn.classList.remove('active');
             resize();
         });
-        
+
         safeListen('sel-sidebar-pos', 'change', e => {
             const ws = document.getElementById('main-workspace');
             if (e.target.value === 'bottom') ws.classList.add('sidebar-bottom');
@@ -799,21 +849,21 @@
         safeListen('sel-direction', 'change', e => {
             direction = e.target.value;
             const ws = document.getElementById('main-workspace');
-            ws.className = 'workspace'; 
+            ws.className = 'workspace';
             ws.classList.add(`dir-${direction}`);
             if (document.getElementById('sel-sidebar-pos').value === 'bottom') ws.classList.add('sidebar-bottom');
-            fallingObjects.length = 0; 
+            fallingObjects.length = 0;
             resize();
         });
 
         safeListen('chk-glow', 'change', e => { if (e.target.checked) glowEnabled = true; else glowEnabled = false; });
         safeListen('chk-cc-glow', 'change', e => ccGlow = e.target.checked);
-        
+
         safeListen('glow-slider', 'input', e => { if (document.getElementById('chk-glow').checked) glowAmount = parseInt(e.target.value); });
         safeListen('cc-opac-slider', 'input', e => ccOpacity = parseFloat(e.target.value));
         safeListen('persist-slider', 'input', e => persistence = parseFloat(e.target.value));
         safeListen('thick-slider', 'input', e => noteThickness = parseInt(e.target.value));
-        
+
         // CRT Slider
         safeListen('crt-slider', 'input', e => {
              const val = parseFloat(e.target.value);
@@ -835,7 +885,7 @@
         safeListen('sig-num', 'input', e => { sigNum = parseInt(e.target.value) || 4; updateTimeSig(); });
         safeListen('sig-den', 'input', e => { sigDen = parseInt(e.target.value) || 4; updateTimeSig(); });
         safeListen('grid-thick', 'input', e => barThickness = parseInt(e.target.value));
-        
+
         safeListen('font-size-slider', 'input', e => {
             fontScale = parseInt(e.target.value);
             document.documentElement.style.setProperty('--font-size-base', fontScale + 'px');
@@ -851,12 +901,12 @@
         });
 
         safeListen('chk-trails-grid', 'change', e => trailsOnGrid = e.target.checked);
-        
+
         // New Features Listeners
-        safeListen('chk-show-pgm', 'change', e => { 
-             showPGM = e.target.checked; 
+        safeListen('chk-show-pgm', 'change', e => {
+             showPGM = e.target.checked;
              const btn = document.getElementById('btn-toggle-pgm');
-             if(btn) if(e.target.checked) btn.classList.add('active'); else btn.classList.remove('active');
+             if(btn) if(btn) if(e.target.checked) btn.classList.add('active'); else btn.classList.remove('active');
         });
         safeListen('chk-fresh-pgm', 'change', e => freshPGM = e.target.checked);
         safeListen('chk-fresh-labels', 'change', e => freshLabels = e.target.checked);
@@ -866,17 +916,37 @@
         safeListen('ovl-smooth-slider', 'input', e => overlaySmooth = parseInt(e.target.value));
         safeListen('ovl-thick-slider', 'input', e => overlayThick = parseInt(e.target.value));
         safeListen('chk-ovl-trail', 'change', e => overlayTrails = e.target.checked);
-        
+
         safeListen('cc-scale-slider', 'input', e => {
             ccScale = parseInt(e.target.value);
             document.documentElement.style.setProperty('--cc-graph-width', ccScale + 'px');
             document.querySelectorAll('.cc-widget canvas').forEach(c => {
-                c.width = ccScale; 
+                c.width = ccScale;
                 // Trigger resize logic manually or wait for next update?
                 // Ideally we update the 'mon.w' property
                 const mon = ccMonitors.get(c.parentElement.parentElement.dataset.id); // brittle selector
                 if(mon) mon.w = ccScale;
             });
+        });
+
+        safeListen('big-cc-scale-slider', 'input', e => {
+            const value = parseFloat(e.target.value);
+            bigCcGraphScale = value;
+            document.getElementById('big-cc-scale-value').innerText = `${Math.round(value * 100)}%`;
+        });
+
+        safeListen('chk-cc-grid', 'change', e => {
+            showCcGrid = e.target.checked;
+            document.getElementById('cc-grid-steps-slider').style.display = showCcGrid ? 'block' : 'none';
+            document.getElementById('cc-grid-custom-input').style.display = showCcGrid ? 'block' : 'none';
+        });
+
+        safeListen('cc-grid-steps-slider', 'input', e => {
+            ccGridSteps = parseInt(e.target.value);
+        });
+
+        safeListen('cc-grid-custom-input', 'input', e => {
+            ccGridCustom = e.target.value;
         });
 
         const handle = document.getElementById('drag-handle');
@@ -895,12 +965,12 @@
             });
             window.addEventListener('mouseup', () => { isResizing = false; document.body.style.cursor = 'default'; });
         }
-        
+
         // --- MOUSE PAN/ZOOM ---
         const vCont = document.getElementById('visualizer-container');
         let isDraggingMain = false;
         let lastX = 0, lastY = 0;
-        
+
         vCont.addEventListener('mousedown', e => {
             if(e.button === 0) { // Left Click
                 isDraggingMain = true;
@@ -909,30 +979,30 @@
                 vCont.style.cursor = 'grabbing';
             }
         });
-        
+
         window.addEventListener('mousemove', e => {
             if(isDraggingMain) {
                 const dx = e.clientX - lastX;
                 // const dy = e.clientY - lastY; // Unused for now
                 lastX = e.clientX;
                 lastY = e.clientY;
-                
+
                 // Adjust PAN
                 const sens = 0.2;
                 panPercent = Math.max(0, Math.min(100, panPercent - (dx * sens)));
                 document.getElementById('pan-slider').value = panPercent;
             }
         });
-        
+
         window.addEventListener('mouseup', () => {
             isDraggingMain = false;
             vCont.style.cursor = 'default';
         });
-        
+
         vCont.addEventListener('wheel', e => {
             e.preventDefault();
             const sign = Math.sign(e.deltaY);
-            
+
             if(direction === 'left' || direction === 'right') {
                  // Horizontal Scroll -> Pan
                  panPercent = Math.max(0, Math.min(100, panPercent + (sign * 2)));
@@ -953,6 +1023,7 @@
                 if(bigCCs.has(id)) bigCCs.delete(id);
                 else bigCCs.add(id);
             }
+            document.getElementById('big-cc-controls').style.display = bigCCs.size > 0 ? 'flex' : 'none';
         });
     }
 
@@ -1038,7 +1109,7 @@
                 if(data.panPercent) { panPercent=data.panPercent; document.getElementById('pan-slider').value=data.panPercent; }
                 if(data.colorMode) { colorMode=data.colorMode; document.getElementById('sel-color-mode').value=data.colorMode; }
                 if(data.ccColorMode) { ccColorMode=data.ccColorMode; document.getElementById('sel-cc-color-mode').value=data.ccColorMode; }
-                
+
                 const setChk = (id, val) => { const el=document.getElementById(id); if(el) { el.checked=val; el.dispatchEvent(new Event('change')); }};
                 if(data.showLabels!==undefined) setChk('chk-labels', data.showLabels);
                 if(data.showGrid!==undefined) setChk('chk-grid', data.showGrid);
@@ -1046,21 +1117,21 @@
                 if(data.showPiano!==undefined) setChk('chk-piano', data.showPiano);
                 if(data.showCLines!==undefined) setChk('chk-clines', data.showCLines);
                 if(data.glowEnabled!==undefined) setChk('chk-glow', data.glowEnabled);
-                
+
                 if(data.glowAmount) { glowAmount=data.glowAmount; document.getElementById('glow-slider').value=data.glowAmount; }
                 if(data.persistence) { persistence=data.persistence; document.getElementById('persist-slider').value=data.persistence; }
                 if(data.noteThickness) { noteThickness=data.noteThickness; document.getElementById('thick-slider').value=data.noteThickness; }
                 if(data.noteShape) { noteShape=data.noteShape; document.getElementById('sel-shape').value=data.noteShape; }
-                
+
                 if(data.sigNum) document.getElementById('sig-num').value = data.sigNum;
                 if(data.sigDen) document.getElementById('sig-den').value = data.sigDen;
                 if(data.barThickness) document.getElementById('grid-thick').value = data.barThickness;
                 if(data.fontScale) { fontScale=data.fontScale; document.getElementById('font-size-slider').value=data.fontScale; document.documentElement.style.setProperty('--font-size-base', fontScale+'px'); }
-                if(data.fontSizeCC) { 
-                    fontSizeCC=data.fontSizeCC; document.getElementById('cc-size-slider').value=data.fontSizeCC; 
+                if(data.fontSizeCC) {
+                    fontSizeCC=data.fontSizeCC; document.getElementById('cc-size-slider').value=data.fontSizeCC;
                     document.querySelectorAll('.cc-val-big').forEach(el => el.style.fontSize = fontSizeCC + 'px');
                 }
-                
+
                 if(data.crtOpacity) {
                     const el = document.getElementById('crt-slider');
                     el.value = data.crtOpacity;
@@ -1074,7 +1145,7 @@
                         if(cb) cb.checked = v;
                     });
                 }
-                
+
                 if(data.channelMaskCC) {
                     channelMaskCC = data.channelMaskCC;
                     channelMaskCC.forEach((v, i) => {
@@ -1086,9 +1157,9 @@
                 if(data.direction) { direction=data.direction; document.getElementById('sel-direction').value=data.direction; document.getElementById('sel-direction').dispatchEvent(new Event('change')); }
                 if(data.sidebarPos) { document.getElementById('sel-sidebar-pos').value=data.sidebarPos; document.getElementById('sel-sidebar-pos').dispatchEvent(new Event('change')); }
                 if(data.ccScrollDir) { ccScrollDir=data.ccScrollDir; document.getElementById('sel-cc-dir').value=data.ccScrollDir; }
-                
+
                 if(data.trailsOnGrid !== undefined) { setChk('chk-trails-grid', data.trailsOnGrid); }
-                
+
                 if(data.showPGM !== undefined) setChk('chk-show-pgm', data.showPGM);
                 if(data.freshPGM !== undefined) setChk('chk-fresh-pgm', data.freshPGM);
                 if(data.freshLabels !== undefined) setChk('chk-fresh-labels', data.freshLabels);
@@ -1097,7 +1168,7 @@
                 if(data.overlaySmooth !== undefined) { overlaySmooth=data.overlaySmooth; document.getElementById('ovl-smooth-slider').value=data.overlaySmooth; }
                 if(data.overlayThick !== undefined) { overlayThick=data.overlayThick; document.getElementById('ovl-thick-slider').value=data.overlayThick; }
                 if(data.overlayTrails !== undefined) setChk('chk-ovl-trail', data.overlayTrails);
-                
+
                 if(data.ccOpacity !== undefined) { ccOpacity=data.ccOpacity; document.getElementById('cc-opac-slider').value=data.ccOpacity; }
                 if(data.ccGlow !== undefined) setChk('chk-cc-glow', data.ccGlow);
 
@@ -1130,13 +1201,13 @@
 
         const r = document.documentElement.style;
         let stack = "sans-serif";
-        
+
         if(val==='tech') stack = "'Rajdhani', sans-serif";
         else if(val==='hacker') stack = "'VT323', monospace";
         else if(val==='gory') stack = "'Nosifer', cursive";
         else if(val==='elegant') stack = "'Playfair Display', serif";
         else if(val==='scifi') stack = "'Orbitron', sans-serif";
-        
+
         currentFontStack = stack;
         r.setProperty('--font-stack', stack);
     }
@@ -1147,7 +1218,7 @@
         mainCanvas.height = vCont.offsetHeight;
         overlayCanvas.width = vCont.offsetWidth;
         overlayCanvas.height = vCont.offsetHeight;
-        
+
         if (direction === 'down' || direction === 'up') {
             pianoCanvas.width = vCont.offsetWidth;
             pianoCanvas.height = 30;
@@ -1158,7 +1229,7 @@
     }
 
     function getNoteColor(note, ch) {
-        if (currentTheme === 'chernobyl') return '#00ffff'; 
+        if (currentTheme === 'chernobyl') return '#00ffff';
         if (colorMode === 'channel') return THEMES[currentTheme].ch[ch];
         if (colorMode === 'octave') {
             const octave = Math.floor(note / 12);
@@ -1174,7 +1245,7 @@
         if(ccColorMode === 'match') return THEMES[currentTheme].ch[ch];
         if(ccColorMode === 'white') return '#ffffff';
         if(ccColorMode === 'random') return randomPaletteCC[ch];
-        
+
         // Check if it's a theme name
         if(THEMES[ccColorMode]) {
             return THEMES[ccColorMode].ch[ch];
@@ -1213,7 +1284,7 @@
     }
 
     document.getElementById('midi-input').addEventListener('change', e => {
-        if(selectedInputId && midiAccess.inputs.has(selectedInputId)) 
+        if(selectedInputId && midiAccess.inputs.has(selectedInputId))
             midiAccess.inputs.get(selectedInputId).onmidimessage = null;
         selectedInputId = e.target.value;
         const input = midiAccess.inputs.get(selectedInputId);
@@ -1225,23 +1296,23 @@
         const cmd = status >> 4;
         const ch = status & 0xf;
 
-        if (status === 0xF8) { handleClock(); return; } 
+        if (status === 0xF8) { handleClock(); return; }
         if (status === 0xFA) { setTransport('PLAY', '#00ff41'); return; }
         if (status === 0xFB) { setTransport('CONT', '#ffff00'); return; }
         if (status === 0xFC) { setTransport('STOP', '#ff0055'); resetClock(); return; }
-        
-        if (status >= 0xF8) return; 
-        
+
+        if (status >= 0xF8) return;
+
         const now = performance.now();
-        
+
         // Channel filtering logic
         // PGM Change (0xC0)
-        if (cmd === 12) { 
+        if (cmd === 12) {
             // Program Change has only 1 data byte usually (d1)
             // It applies to a channel, so filter by Note Mask (closest fit for "events")?
             // Or CC Mask? Usually PGM is control. Let's use CC mask.
             if(channelMaskCC[ch] === false) return;
-            
+
             fallingObjects.push({
                  type: 'pgm',
                  val: d1,
@@ -1254,34 +1325,34 @@
             return;
         }
 
-        if (cmd === 9 && d2 > 0) { 
+        if (cmd === 9 && d2 > 0) {
             if (channelMaskNotes[ch] === false) return;
             const col = getNoteColor(d1, ch);
             activeNotes.set(`${ch}-${d1}`, {
                 note: d1, ch, vel: d2, start: now,
                 color: col
             });
-            flashCh(ch, col); 
+            flashCh(ch, col);
         }
-        else if (cmd === 8 || (cmd === 9 && d2 === 0)) { 
+        else if (cmd === 8 || (cmd === 9 && d2 === 0)) {
             const id = `${ch}-${d1}`;
             if (activeNotes.has(id)) {
                 const n = activeNotes.get(id);
                 const duration = now - n.start;
-                const len = noteSpeed * (duration / 16.66); 
+                const len = noteSpeed * (duration / 16.66);
                 fallingObjects.push({
-                    type: 'note', note: n.note, 
-                    pos: 0, len: len, 
+                    type: 'note', note: n.note,
+                    pos: 0, len: len,
                     color: n.color,
-                    timeDropped: now 
+                    timeDropped: now
                 });
                 activeNotes.delete(id);
             }
         }
-        else if (cmd === 11) { 
+        else if (cmd === 11) {
             if (channelMaskCC[ch] === false) return;
             handleCC(ch, d1, d2);
-            flashCh(ch, null, true); 
+            flashCh(ch, null, true);
         }
     }
 
@@ -1290,7 +1361,7 @@
         el.innerText = txt;
         el.style.color = color;
     }
-    
+
     function resetClock() {
         clockTicks = 0; barTickCounter = 0;
     }
@@ -1298,7 +1369,7 @@
     function flashCh(ch, color, isCC=false) {
         const el = chIndicators[ch];
         if(!el) return;
-        
+
         if(isCC) {
             el.style.backgroundColor = 'var(--data-color)';
             el.style.color = '#000';
@@ -1317,7 +1388,7 @@
     function handleClock() {
         const now = performance.now();
         lastActiveClock = now;
-        
+
         if (clockTicks % 24 === 0) {
             const dot = document.getElementById('clock-dot');
             dot.classList.add('beat');
@@ -1328,8 +1399,8 @@
             const delta = now - lastClockTime;
             if (delta > 2 && delta < 200) {
                 tickHistory.push(delta);
-                if(tickHistory.length > 192) tickHistory.shift(); 
-                
+                if(tickHistory.length > 192) tickHistory.shift();
+
                 if(clockTicks % 24 === 0) {
                     const avgDelta = tickHistory.reduce((a,b)=>a+b,0) / tickHistory.length;
                     const bpm = 60000 / (avgDelta * 24);
@@ -1338,20 +1409,20 @@
             }
         }
         lastClockTime = now;
-        
+
         if (showBarLines && barTickCounter >= ticksPerBar) {
             fallingObjects.push({ type: 'grid', pos: 0, isBar: true, timeDropped: now });
-            barTickCounter = 0; 
+            barTickCounter = 0;
             if(labelPerBar) labeledPitches.clear(); // Reset labels per bar
         }
-        
-        const beatInterval = CONFIG.PPQN; 
+
+        const beatInterval = CONFIG.PPQN;
         if (showGrid && clockTicks % beatInterval === 0) {
             if (barTickCounter !== 0) {
                 fallingObjects.push({ type: 'grid', pos: 0, isBar: false, timeDropped: now });
             }
         }
-        
+
         clockTicks++;
         barTickCounter++;
     }
@@ -1359,22 +1430,22 @@
     function handleCC(ch, cc, val) {
         const id = `${ch}-${cc}`;
         if(hiddenCCs.has(id)) return;
-        
+
         let mon = ccMonitors.get(id);
         const cont = document.getElementById('cc-container');
         const chColor = THEMES[currentTheme].ch[ch];
-        const valFont = "'Share Tech Mono', monospace"; 
-        
+        const valFont = "'Share Tech Mono', monospace";
+
         if (!mon) {
             if(ccMonitors.size === 0 && (cont.children.length === 0 || cont.children[0]?.innerText.includes("NO SIGNAL"))) cont.innerHTML = '';
-            
+
             const el = document.createElement('div');
             el.className = 'cc-widget';
             el.draggable = true;
             el.dataset.id = id;
             el.dataset.ch = ch;
             el.dataset.cc = cc;
-            
+
             el.innerHTML = `
                 <div class="cc-meta">
                     <div style="display:flex; gap:4px; font-size:10px; font-weight:bold; align-items:center; width:100%;">
@@ -1406,22 +1477,22 @@
                 const name = prompt("Rename CC Graph:", mon.label || `CH${ch+1} CC${cc}`);
                 if (name) {
                     mon.label = name.toUpperCase();
-                    persistentLabels.set(id, mon.label); 
+                    persistentLabels.set(id, mon.label);
                     el.querySelector('.cc-name').innerText = mon.label;
                     el.querySelector('.cc-bg-label').innerText = mon.label;
                 }
             };
-            
+
             el.oncontextmenu = (e) => {
                 e.preventDefault();
                 hiddenCCs.add(id);
                 el.classList.add('hidden');
             };
-            
+
             el.ondragstart = (e) => {
                 e.dataTransfer.setData('text/plain', id);
             };
-            
+
             const children = Array.from(cont.children);
             let inserted = false;
             for(let child of children) {
@@ -1434,11 +1505,11 @@
                 }
             }
             if(!inserted) cont.appendChild(el);
-            
+
             const cvs = el.querySelector('canvas');
             cvs.width = ccScale;
             cvs.height = 30;
-            
+
             // Restore persistent label if exists
             const savedLabel = persistentLabels.get(id) || '';
             if(savedLabel) {
@@ -1447,8 +1518,9 @@
             }
 
             mon = {
-                ch, cc, val, 
-                history: [], 
+                ch, cc, val,
+                smoothedValue: val, // Initialize smoothed value
+                history: [],
                 element: el,
                 valEl: el.querySelector('.cc-val-big'),
                 ctx: cvs.getContext('2d'),
@@ -1456,12 +1528,13 @@
                 color: getCCColor(ch, cc),
                 lastUpdate: performance.now(),
                 label: savedLabel,
-                pinned: false
+                pinned: false,
+                needsUpdate: false // Initialize the flag
             };
-            
+
             ccMonitors.set(id, mon);
             mon.history.push({t: performance.now(), v: val});
-            
+
             const ro = new ResizeObserver(() => {
                 const rect = el.querySelector('.cc-graph-container').getBoundingClientRect();
                 if(rect.width > 0) {
@@ -1473,18 +1546,10 @@
         } else {
             mon.val = val;
             mon.lastUpdate = performance.now();
-            mon.valEl.innerText = val;
-            mon.color = THEMES[currentTheme].ch[ch];
-            
-            // Ensure label color update if theme changed
-            const rows = mon.element.querySelectorAll('.cc-meta span');
-            if(rows.length >= 4) {
-                rows[1].style.color = mon.color; // CH Number
-                rows[3].style.color = mon.color; // CC Number
-            }
+            mon.needsUpdate = true; // Flag for update in render loop
 
             mon.history.push({t: performance.now(), v: val});
-            
+
             const timeWindow = 60000; // Increased history
             while(mon.history.length > 0 && mon.history[0].t < performance.now() - timeWindow) {
                 mon.history.shift();
@@ -1493,44 +1558,56 @@
     }
 
     function drawCCGraphs(now) {
-        const windowSize = 5000; 
-        
+        const windowSize = 5000;
+
         ccMonitors.forEach(mon => {
+            // --- Deferred DOM Update ---
+            if (mon.needsUpdate) {
+                mon.valEl.innerText = mon.val;
+
+                // Also update color-dependent parts here to keep it synced
+                const newColor = getCCColor(mon.ch, mon.cc);
+                mon.color = newColor;
+                const meta = mon.element.querySelectorAll('.cc-meta span');
+                if(meta.length >= 4) {
+                    meta[1].style.color = newColor;
+                    meta[3].style.color = newColor;
+                }
+
+                mon.needsUpdate = false;
+            }
+            // -------------------------
+
             const ctx = mon.ctx;
             const w = mon.w;
             const h = mon.h;
-            
-            // Update Color Dynamically
-            const col = getCCColor(mon.ch, mon.cc);
-            mon.color = col; // Sync for big overlay usage
-            
-            // Update Small Widget Colors
-            const meta = mon.element.querySelectorAll('.cc-meta span');
-            if(meta.length >=4) { meta[1].style.color = col; meta[3].style.color = col; }
-            
+
+            // Use the already updated color
+            const col = mon.color;
+
             ctx.clearRect(0,0,w,h);
             ctx.strokeStyle = col;
             ctx.lineWidth = 2;
             ctx.beginPath();
-            
+
             const points = [...mon.history];
             points.push({t: now, v: mon.val});
-            
+
             if (points.length === 0) return;
-            
+
             const startTime = now - windowSize;
             let firstPoint = true;
-            
+
             for(let i=0; i<points.length; i++) {
                 const p = points[i];
                 let x;
                 if (ccScrollDir === 'left') {
                     x = ((p.t - startTime) / windowSize) * w;
                 } else {
-                    x = ((now - p.t) / windowSize) * w; 
+                    x = ((now - p.t) / windowSize) * w;
                 }
                 const y = h - (p.v / 127) * h;
-                
+
                 if(firstPoint) {
                     ctx.moveTo(x, y);
                     firstPoint = false;
@@ -1540,9 +1617,9 @@
                     if (ccScrollDir === 'left') prevX = ((prevP.t - startTime) / windowSize) * w;
                     else prevX = ((now - prevP.t) / windowSize) * w;
                     const prevY = h - (prevP.v / 127) * h;
-                    
-                    ctx.lineTo(x, prevY); 
-                    ctx.lineTo(x, y);     
+
+                    ctx.lineTo(x, prevY);
+                    ctx.lineTo(x, y);
                 }
             }
             ctx.stroke();
@@ -1557,7 +1634,22 @@
         // Only clear history, do not destroy widgets
         ccMonitors.forEach(mon => {
             mon.history = [];
+            mon.smoothedValue = mon.val; // Reset smoothed value
         });
+    }
+
+    function getCcGridValues() {
+        if (ccGridCustom) {
+            return ccGridCustom.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n) && n >= 0 && n <= 127);
+        }
+        const values = new Set([0, 127]);
+        if (ccGridSteps > 1) {
+            const step = 127 / ccGridSteps;
+            for (let i = 1; i < ccGridSteps; i++) {
+                values.add(Math.round(i * step));
+            }
+        }
+        return Array.from(values).sort((a, b) => a - b);
     }
 
     function drawNoteShape(ctx, x, y, w, h, type) {
@@ -1574,12 +1666,12 @@
             ctx.beginPath();
             // Direction dependent teardrop?
             if (direction === 'down' || direction === 'right') {
-                 ctx.moveTo(x, y); 
+                 ctx.moveTo(x, y);
                  ctx.lineTo(x+w, y);
-                 ctx.lineTo(x+w/2, y+h); 
+                 ctx.lineTo(x+w/2, y+h);
                  ctx.fill();
             } else {
-                 ctx.moveTo(x+w/2, y); 
+                 ctx.moveTo(x+w/2, y);
                  ctx.lineTo(x+w, y+h);
                  ctx.lineTo(x, y+h);
                  ctx.fill();
@@ -1611,18 +1703,25 @@
     let lastFrameTime = performance.now();
     function loop() {
         requestAnimationFrame(loop);
-        
+
         const now = performance.now();
         const dt = now - lastFrameTime;
         lastFrameTime = now;
-        
+
+        // --- Slew Update Logic ---
+        ccMonitors.forEach(mon => {
+            if (mon.smoothedValue === undefined) mon.smoothedValue = mon.val;
+            const smoothFactor = Math.pow(0.5, dt / (overlaySmooth * 10)); // Time-based smoothing
+            mon.smoothedValue = mon.val + (mon.smoothedValue - mon.val) * smoothFactor;
+        });
+
         const moveDist = noteSpeed * (dt / 16.66);
 
         if (now - lastActiveClock > 2000 && lastActiveClock !== 0) {
             document.getElementById('bpm-val').innerText = "NO CLOCK";
-            lastActiveClock = 0; 
+            lastActiveClock = 0;
         }
-        
+
         // CC Render
         drawCCGraphs(now);
 
@@ -1631,7 +1730,7 @@
         const startKey = (panPercent / 100) * maxStart;
         const endKey = startKey + visKeys;
         const keyW = mainCanvas.width / visKeys;
-        
+
         mainCtx.save();
         // TRAILS: Fade to BG color instead of black
         if (persistence > 0) {
@@ -1647,12 +1746,12 @@
             mainCtx.fillRect(0,0,mainCanvas.width, mainCanvas.height);
         }
         mainCtx.restore();
-        
+
         // Clear Overlay Canvas every frame
         overlayCtx.clearRect(0,0,overlayCanvas.width, overlayCanvas.height);
 
         const isVertical = (direction === 'down' || direction === 'up');
-        
+
         if (isVertical) {
             drawVertical(startKey, endKey, visKeys, moveDist, keyW);
         } else {
@@ -1668,16 +1767,16 @@
         if(showPiano) {
             pianoCtx.fillStyle = getComputedStyle(document.body).getPropertyValue('--panel-bg');
             pianoCtx.fillRect(0,0, pianoCanvas.width, pianoCanvas.height);
-            
+
             for(let i=Math.floor(startKey); i<endKey; i++) {
                 const x = Math.floor((i-startKey)*keyW);
                 const w = Math.ceil(keyW);
                 const isBlack = CONFIG.BLACK_KEYS.includes(i%12);
                 const noteName = CONFIG.NOTE_NAMES[i%12];
-                
+
                 pianoCtx.fillStyle = isBlack ? '#222' : '#888';
                 pianoCtx.fillRect(x, isBlack?0:10, w-1, isBlack?18:20);
-                
+
                 // C-Line Labels Adjacent (Under) Piano Roll
                 if(noteName === "C") {
                     // NO LABELS INSIDE KEYS
@@ -1693,7 +1792,7 @@
                 }
             }
         }
-        
+
         // C-LINES
         if (showCLines) {
             mainCtx.save();
@@ -1702,12 +1801,12 @@
             mainCtx.font = `bold ${fontScale*1.5}px ${currentFontStack}`; // Use Dynamic Font
             mainCtx.fillStyle = 'rgba(255,255,255,0.1)';
             for(let i=Math.floor(startKey); i<endKey; i++) {
-                if (i % 12 === 0) { 
+                if (i % 12 === 0) {
                      const x = Math.floor((i-startKey)*keyW);
                      mainCtx.beginPath();
                      mainCtx.moveTo(x, 0); mainCtx.lineTo(x, mainCanvas.height);
                      mainCtx.stroke();
-                     // If piano hidden, draw labels here too? 
+                     // If piano hidden, draw labels here too?
                      // Already covered by piano logic above? No, if piano off, that loop doesn't run.
                      if(!showPiano) {
                          mainCtx.fillText("C" + (Math.floor(i/12)-1), x + 5, mainCanvas.height - 20);
@@ -1724,7 +1823,7 @@
         for(let i=fallingObjects.length-1; i>=0; i--) {
             const o = fallingObjects[i];
             o.pos += moveDist;
-            
+
             if(o.pos > mainCanvas.height + o.len) { fallingObjects.splice(i,1); continue; }
 
             if(o.type === 'grid') {
@@ -1734,10 +1833,10 @@
                 targetCtx.strokeStyle = o.isBar ? getComputedStyle(document.body).getPropertyValue('--grid-bar') : getComputedStyle(document.body).getPropertyValue('--grid-beat');
                 targetCtx.lineWidth = o.isBar ? barThickness : 1;
                 targetCtx.beginPath();
-                
+
                 if (direction === 'down') {
                     targetCtx.moveTo(0, o.pos); targetCtx.lineTo(mainCanvas.width, o.pos);
-                } else { 
+                } else {
                     const y = mainCanvas.height - o.pos;
                     targetCtx.moveTo(0, y); targetCtx.lineTo(mainCanvas.width, y);
                 }
@@ -1746,21 +1845,21 @@
             }
             else if(o.type === 'pgm') {
                 if(!showPGM) continue;
-                const targetCtx = freshPGM ? overlayCtx : mainCtx; 
+                const targetCtx = freshPGM ? overlayCtx : mainCtx;
                 targetCtx.save(); targetCtx.shadowBlur = 0;
-                
+
                 // Color by Value (Mod 16) using active palette
                 const pgmCol = getNoteColor(o.val, o.val % 16);
                 targetCtx.fillStyle = pgmCol;
                 targetCtx.globalAlpha = 0.4;
-                
+
                 let py;
                 if(direction === 'down') py = o.pos;
                 else py = mainCanvas.height - o.pos;
-                
+
                 targetCtx.fillRect(0, py, mainCanvas.width, 4);
                 targetCtx.globalAlpha = 1.0;
-                
+
                 targetCtx.font = `bold ${labelSize}px ${currentFontStack}`;
                 targetCtx.fillStyle = pgmCol;
                 targetCtx.fillText(`PGM ${o.val}`, 10, py - 5);
@@ -1769,121 +1868,138 @@
             else if(o.type === 'note') {
                 if(o.note < startKey || o.note >= endKey) continue;
                 const x = Math.floor((o.note - startKey)*keyW) + thickOffset;
-                
+
                 mainCtx.save();
                 if(glowEnabled && glowAmount > 0) {
                     mainCtx.shadowColor = (currentTheme === 'chernobyl') ? '#00FFFF' : o.color;
                     mainCtx.shadowBlur = glowAmount;
                 }
                 mainCtx.fillStyle = o.color;
-                
+
                 let ry;
-                if (direction === 'down') { ry = o.pos; } 
+                if (direction === 'down') { ry = o.pos; }
                 else { ry = mainCanvas.height - o.pos - o.len; }
-                
+
                 // Draw Shape
                 drawNoteShape(mainCtx, x, ry, Math.ceil(thickW), o.len, noteShape);
                 mainCtx.restore();
-                
+
                 // Labels
                 if(showLabels && keyW > 15) {
                     const alreadyLabeled = labelPerBar && labeledPitches.has(o.note);
                     if (!alreadyLabeled) {
                         const targetCtx = freshLabels ? overlayCtx : mainCtx;
-                        targetCtx.save(); targetCtx.shadowBlur=0; 
+                        targetCtx.save(); targetCtx.shadowBlur=0;
                         targetCtx.fillStyle = (labelColorMode === 'match') ? o.color : '#fff';
-                        targetCtx.font=`bold ${labelSize}px ${currentFontStack}`; 
-                        
+                        targetCtx.font=`bold ${labelSize}px ${currentFontStack}`;
+
                         // Leading Edge Position
                         let ly;
                         if (direction === 'down') ly = o.pos + o.len + 12; // Bottom
                         else ly = (mainCanvas.height - o.pos - o.len) - 5; // Top
-                        
+
                         targetCtx.fillText(CONFIG.NOTE_NAMES[o.note%12], x+2, ly);
                         targetCtx.restore();
-                        
+
                         if(labelPerBar) labeledPitches.add(o.note);
                     }
                 }
             }
         }
-        
+
         // BIG CC OVERLAY (Vertical)
         if(bigCCs.size > 0) {
             const targetCtx = overlayTrails ? mainCtx : overlayCtx;
             targetCtx.save();
-            
+
             if(ccGlow) {
                  targetCtx.shadowBlur = 20;
-                 // Use white shadow if color is dark? Default to color.
             }
 
             let idx = 0;
             const laneW = mainCanvas.width / bigCCs.size;
-            
+
             bigCCs.forEach(id => {
                  const mon = ccMonitors.get(id);
                  if(!mon) return;
-                 
+
                  if(ccGlow) targetCtx.shadowColor = mon.color;
-                 
+
                  targetCtx.strokeStyle = mon.color;
                  targetCtx.lineWidth = overlayThick;
                  targetCtx.globalAlpha = ccOpacity;
                  targetCtx.beginPath();
-                 
-                 // Ensure we draw to 'now' so static lines persist
+
                  const points = [...mon.history];
-                 // Always push a point at 'now' with last value to fill gap
-                 points.push({t: now, v: mon.val}); 
-                 
-                 // Collect XY points first for smoothing
+                 points.push({t: now, v: mon.smoothedValue}); // Draw using smoothed value
+
                  const coords = [];
                  const xOffset = idx * laneW;
-                 
+
                  for(let i=0; i<points.length; i++) {
                      const p = points[i];
                      const dist = (now - p.t) * (noteSpeed / 16.66);
                      if(dist > mainCanvas.height) continue;
-                     
+
                      let y;
-                     if(direction === 'down') y = dist; // 0 is top/now
-                     else y = mainCanvas.height - dist; // height is bottom/now
-                     
-                     const x = xOffset + (p.v / 127) * laneW;
+                     if(direction === 'down') y = dist;
+                     else y = mainCanvas.height - dist;
+
+                     const laneCenterX = xOffset + laneW / 2;
+                     const scaledWidth = laneW * bigCcGraphScale;
+                     const x = laneCenterX - (scaledWidth / 2) + (p.v / 127) * scaledWidth;
                      coords.push({x, y});
                  }
-                 
-                 if(coords.length >= 2) {
-                     if(overlaySmooth > 0 && coords.length > 2) {
-                         // Simple Smoothing (Catmull-Rom or Quadratic would be better, but Chaikin/Midpoint is easy)
-                         // Just drawing lineTo is linear.
-                         // Let's use quadraticCurveTo for simple smoothing
-                         targetCtx.moveTo(coords[0].x, coords[0].y);
-                         for (let i = 1; i < coords.length - 1; i ++) {
-                            const xc = (coords[i].x + coords[i+1].x) / 2;
-                            const yc = (coords[i].y + coords[i+1].y) / 2;
-                            targetCtx.quadraticCurveTo(coords[i].x, coords[i].y, xc, yc);
-                         }
-                         // Last point
-                         targetCtx.lineTo(coords[coords.length-1].x, coords[coords.length-1].y);
-                     } else {
-                         targetCtx.moveTo(coords[0].x, coords[0].y);
-                         for(let i=1; i<coords.length; i++) targetCtx.lineTo(coords[i].x, coords[i].y);
-                     }
-                     
-                     targetCtx.stroke();
-                 }
-                 
+
+                if (coords.length > 0) {
+                    targetCtx.moveTo(coords[0].x, coords[0].y);
+                    for (let i = 1; i < coords.length; i++) {
+                        if (overlaySmooth > 0) {
+                            const xc = (coords[i-1].x + coords[i].x) / 2;
+                            const yc = (coords[i-1].y + coords[i].y) / 2;
+                            targetCtx.quadraticCurveTo(coords[i-1].x, coords[i-1].y, xc, yc);
+                        } else {
+                            targetCtx.lineTo(coords[i-1].x, coords[i].y);
+                            targetCtx.lineTo(coords[i].x, coords[i].y);
+                        }
+                    }
+                    targetCtx.stroke();
+                }
+
+                // CC GRID OVERLAY (Vertical) - CORRECTED
+                if (showCcGrid) {
+                    const gridValues = getCcGridValues();
+                    overlayCtx.save();
+                    overlayCtx.strokeStyle = 'rgba(255,255,255,0.2)';
+                    overlayCtx.lineWidth = 1;
+                    overlayCtx.font = `bold 10px ${currentFontStack}`;
+                    overlayCtx.fillStyle = 'rgba(255,255,255,0.4)';
+
+                    const laneCenterX = xOffset + laneW / 2;
+                    const scaledWidth = laneW * bigCcGraphScale;
+                    const startX = laneCenterX - scaledWidth / 2;
+                    const endX = laneCenterX + scaledWidth / 2;
+
+                    gridValues.forEach(val => {
+                        const y = (mainCanvas.height) - (val / 127) * (mainCanvas.height);
+                        overlayCtx.beginPath();
+                        overlayCtx.moveTo(startX, y);
+                        overlayCtx.lineTo(endX, y);
+                        overlayCtx.stroke();
+                        overlayCtx.fillText(val, startX + 2, y - 2);
+                    });
+                    overlayCtx.restore();
+                }
+
                  // Label (always fresh/overlay)
                  overlayCtx.save();
                  overlayCtx.fillStyle = mon.color;
                  overlayCtx.font = `bold ${labelSize}px ${currentFontStack}`;
-                 
-                 const labelY = (direction==='down') ? 35 : mainCanvas.height - 20; // Below piano roll in Down mode (30px piano)
+
+                 const labelY = (direction==='down') ? 35 : mainCanvas.height - 20;
                  overlayCtx.fillText(mon.label || `CC ${mon.cc}`, xOffset + 5, labelY);
                  overlayCtx.restore();
-                 
+
                  idx++;
             });
             targetCtx.restore();
@@ -1895,53 +2011,49 @@
             const x = Math.floor((n.note - startKey)*keyW) + thickOffset;
             const duration = performance.now() - n.start;
             const len = noteSpeed * (duration / 16.66);
-            
+
             mainCtx.save();
             if(glowEnabled && glowAmount > 0) {
                 mainCtx.shadowColor = (currentTheme === 'chernobyl') ? '#00FFFF' : n.color;
                 mainCtx.shadowBlur = glowAmount;
             }
             mainCtx.fillStyle = n.color;
-            
+
             let ry;
-            if (direction === 'down') { ry = 0; } 
+            if (direction === 'down') { ry = 0; }
             else { ry = mainCanvas.height - len; }
-            
+
             drawNoteShape(mainCtx, x, ry, Math.ceil(thickW), len, noteShape);
             mainCtx.restore();
-            
+
             if(showLabels && keyW > 15) {
                 // Active note label
                 const alreadyLabeled = labelPerBar && labeledPitches.has(n.note);
                 if(!alreadyLabeled) {
                     const targetCtx = freshLabels ? overlayCtx : mainCtx;
-                    targetCtx.save(); targetCtx.shadowBlur=0; 
+                    targetCtx.save(); targetCtx.shadowBlur=0;
                     targetCtx.fillStyle = (labelColorMode === 'match') ? n.color : '#fff';
-                    targetCtx.font=`bold ${labelSize}px ${currentFontStack}`; 
-                    
+                    targetCtx.font=`bold ${labelSize}px ${currentFontStack}`;
+
                     let ly;
-                    if (direction === 'down') ly = len + 12; 
+                    if (direction === 'down') ly = len + 12;
                     else ly = (mainCanvas.height - len) - 5;
-    
+
                     targetCtx.fillText(CONFIG.NOTE_NAMES[n.note%12], x+2, ly);
                     targetCtx.restore();
-                    
-                    if(labelPerBar) labeledPitches.add(n.note); 
+
+                    if(labelPerBar) labeledPitches.add(n.note);
                 }
             }
         });
-        
-        // GRID LANES - Always on Overlay or Main? Usually static grid is best on overlay to avoid smearing
-        // But if trailsOnGrid is requested, maybe user wants everything to trail? 
-        // Let's put Static Grid on Overlay usually, unless trailsOnGrid is specifically requested for all grid elements.
-        // For now, let's keep static lanes on Overlay for cleanliness unless Trails requested.
-        
+
+        // GRID LANES
         if(showGrid) {
              const targetCtx = trailsOnGrid ? mainCtx : overlayCtx;
              for(let i=Math.floor(startKey); i<endKey; i++) {
                 const x = Math.floor((i-startKey)*keyW);
                 const w = Math.ceil(keyW);
-                
+
                 targetCtx.save(); targetCtx.shadowBlur=0;
                 const isBlack = CONFIG.BLACK_KEYS.includes(i%12);
                 targetCtx.fillStyle = isBlack ? 'rgba(255,255,255,0.03)' : 'transparent';
@@ -1962,20 +2074,20 @@
         if(showPiano) {
             pianoCtx.fillStyle = getComputedStyle(document.body).getPropertyValue('--panel-bg');
             pianoCtx.fillRect(0,0, pianoCanvas.width, pianoCanvas.height);
-            
+
             for(let i=Math.floor(startKey); i<endKey; i++) {
                 const y = mainCanvas.height - (i - startKey + 1) * keyH;
                 const h = Math.ceil(keyH);
                 const isBlack = CONFIG.BLACK_KEYS.includes(i%12);
                 const noteName = CONFIG.NOTE_NAMES[i%12];
-                
+
                 pianoCtx.fillStyle = isBlack ? '#222' : '#888';
                 pianoCtx.fillRect(isBlack?0:0, y, isBlack?20:38, h-1);
-                
+
                 // Labels
                 pianoCtx.fillStyle = '#fff';
                 pianoCtx.font = `bold ${fontScale*0.9}px ${currentFontStack}`;
-                
+
                 if(noteName === "C") {
                     const octave = Math.floor(i/12) - 1;
                     pianoCtx.fillText("C"+octave, 22, y + h - 4);
@@ -2005,11 +2117,11 @@
 
         // FALLING
         const now = performance.now();
-        
+
         for(let i=fallingObjects.length-1; i>=0; i--) {
             const o = fallingObjects[i];
-            o.pos += moveDist; 
-            
+            o.pos += moveDist;
+
             if(o.pos > mainCanvas.width + o.len) { fallingObjects.splice(i,1); continue; }
 
             if(o.type === 'grid') {
@@ -2018,7 +2130,7 @@
                 targetCtx.strokeStyle = o.isBar ? getComputedStyle(document.body).getPropertyValue('--grid-bar') : getComputedStyle(document.body).getPropertyValue('--grid-beat');
                 targetCtx.lineWidth = o.isBar ? barThickness : 1;
                 targetCtx.beginPath();
-                
+
                 if (direction === 'right') {
                     targetCtx.moveTo(o.pos, 0); targetCtx.lineTo(o.pos, mainCanvas.height);
                 } else { // LEFT
@@ -2032,18 +2144,18 @@
                 if(!showPGM) continue;
                 const targetCtx = freshPGM ? overlayCtx : mainCtx;
                 targetCtx.save(); targetCtx.shadowBlur = 0;
-                
+
                 const pgmCol = getNoteColor(o.val, o.val % 16);
                 targetCtx.fillStyle = pgmCol;
                 targetCtx.globalAlpha = 0.4;
-                
+
                 let px;
                 if(direction === 'right') px = o.pos;
                 else px = mainCanvas.width - o.pos;
-                
+
                 targetCtx.fillRect(px, 0, 4, mainCanvas.height);
                 targetCtx.globalAlpha = 1.0;
-                
+
                 targetCtx.font = `bold ${labelSize}px ${currentFontStack}`;
                 targetCtx.fillStyle = pgmCol;
                 targetCtx.fillText(`PGM ${o.val}`, px + 5, 20);
@@ -2052,33 +2164,33 @@
             else if(o.type === 'note') {
                 if(o.note < startKey || o.note >= endKey) continue;
                 const y = mainCanvas.height - (o.note - startKey + 1) * keyH + thickOffset;
-                
+
                 mainCtx.save();
                 if(glowEnabled && glowAmount > 0) {
                     mainCtx.shadowColor = (currentTheme === 'chernobyl') ? '#00FFFF' : o.color;
                     mainCtx.shadowBlur = glowAmount;
                 }
                 mainCtx.fillStyle = o.color;
-                
+
                 let rx;
-                if (direction === 'right') { rx = 0; } 
+                if (direction === 'right') { rx = 0; }
                 else { rx = mainCanvas.width - o.pos - o.len; }
-                
+
                 drawNoteShape(mainCtx, rx, y, o.len, Math.ceil(thickH), noteShape);
                 mainCtx.restore();
-                
+
                 if(showLabels && keyH > 15) {
                     const alreadyLabeled = labelPerBar && labeledPitches.has(o.note);
                     if(!alreadyLabeled) {
                         const targetCtx = freshLabels ? overlayCtx : mainCtx;
-                        targetCtx.save(); targetCtx.shadowBlur=0; 
+                        targetCtx.save(); targetCtx.shadowBlur=0;
                         targetCtx.fillStyle = (labelColorMode === 'match') ? o.color : '#fff';
                         targetCtx.font=`bold ${labelSize}px ${currentFontStack}`;
-                        
+
                         let lx;
                         if (direction === 'right') lx = o.pos + o.len + 5;
                         else lx = (mainCanvas.width - o.pos - o.len) - 15;
-                        
+
                         targetCtx.fillText(CONFIG.NOTE_NAMES[o.note%12], lx, y + keyH/2 + 4);
                         targetCtx.restore();
                         if(labelPerBar) labeledPitches.add(o.note);
@@ -2086,80 +2198,100 @@
                 }
             }
         }
-        
+
         // BIG CC OVERLAY (Horizontal)
         if(bigCCs.size > 0) {
             const targetCtx = overlayTrails ? mainCtx : overlayCtx;
             targetCtx.save();
-            
+
             if(ccGlow) {
                  targetCtx.shadowBlur = 20;
             }
-            
+
             let idx = 0;
             const laneH = mainCanvas.height / bigCCs.size;
-            
+
             bigCCs.forEach(id => {
                  const mon = ccMonitors.get(id);
                  if(!mon) return;
-                 
+
                  if(ccGlow) targetCtx.shadowColor = mon.color;
-                 
+
                  targetCtx.strokeStyle = mon.color;
                  targetCtx.lineWidth = overlayThick;
                  targetCtx.globalAlpha = ccOpacity;
                  targetCtx.beginPath();
-                 
+
                  const points = [...mon.history];
-                 points.push({t: now, v: mon.val});
-                 
+                 points.push({t: now, v: mon.smoothedValue});
+
                  const coords = [];
                  const yOffset = idx * laneH;
-                 
+
                  for(let i=0; i<points.length; i++) {
                      const p = points[i];
                      const dist = (now - p.t) * (noteSpeed / 16.66);
                      if(dist > mainCanvas.width) continue;
-                     
+
                      let x;
-                     if(direction === 'right') x = dist; 
-                     else x = mainCanvas.width - dist; 
-                     
-                     // Map 0-127 to Lane Height. Note: canvas Y is down.
-                     // We want 0 at bottom of lane, 127 at top of lane?
-                     // Lane Bottom = yOffset + laneH.
-                     // Value Height = (v/127)*laneH.
-                     // Y = (yOffset + laneH) - Value Height.
-                     
-                     const y = (yOffset + laneH) - (p.v / 127) * laneH;
-                     coords.push({x, y});
-                 }
-                 
-                 if(coords.length >= 2) {
-                     if(overlaySmooth > 0 && coords.length > 2) {
-                         targetCtx.moveTo(coords[0].x, coords[0].y);
-                         for (let i = 1; i < coords.length - 1; i ++) {
-                            const xc = (coords[i].x + coords[i+1].x) / 2;
-                            const yc = (coords[i].y + coords[i+1].y) / 2;
-                            targetCtx.quadraticCurveTo(coords[i].x, coords[i].y, xc, yc);
-                         }
-                         targetCtx.lineTo(coords[coords.length-1].x, coords[coords.length-1].y);
-                     } else {
-                         targetCtx.moveTo(coords[0].x, coords[0].y);
-                         for(let i=1; i<coords.length; i++) targetCtx.lineTo(coords[i].x, coords[i].y);
-                     }
-                     targetCtx.stroke();
-                 }
-                 
+                     if(direction === 'right') x = dist;
+                     else x = mainCanvas.width - dist;
+
+                    const laneCenterY = yOffset + laneH / 2;
+                    const scaledHeight = laneH * bigCcGraphScale;
+                    const y = laneCenterY + (scaledHeight / 2) - (p.v / 127) * scaledHeight;
+                    coords.push({x, y});
+                }
+
+                if (coords.length > 0) {
+                    targetCtx.moveTo(coords[0].x, coords[0].y);
+                    for (let i = 1; i < coords.length; i++) {
+                        if (overlaySmooth > 0) {
+                            const xc = (coords[i-1].x + coords[i].x) / 2;
+                            const yc = (coords[i-1].y + coords[i].y) / 2;
+                            targetCtx.quadraticCurveTo(coords[i-1].x, coords[i-1].y, xc, yc);
+                        } else {
+                            targetCtx.lineTo(coords[i-1].x, coords[i].y);
+                            targetCtx.lineTo(coords[i].x, coords[i].y);
+                        }
+                    }
+                    targetCtx.stroke();
+                }
+
+                // CC GRID OVERLAY (Horizontal) - CORRECTED
+                if (showCcGrid) {
+                    const gridValues = getCcGridValues();
+                    overlayCtx.save();
+                    overlayCtx.strokeStyle = 'rgba(255,255,255,0.2)';
+                    overlayCtx.lineWidth = 1;
+                    overlayCtx.font = `bold 10px ${currentFontStack}`;
+                    overlayCtx.fillStyle = 'rgba(255,255,255,0.4)';
+
+                    const laneCenterY = yOffset + laneH / 2;
+                    const scaledHeight = laneH * bigCcGraphScale;
+                    const startY = laneCenterY - scaledHeight / 2;
+                    const endY = laneCenterY + scaledHeight / 2;
+
+                    gridValues.forEach(val => {
+                        const x = (mainCanvas.width) - (val / 127) * mainCanvas.width;
+                        overlayCtx.beginPath();
+                        overlayCtx.moveTo(x, startY);
+                        overlayCtx.lineTo(x, endY);
+                        overlayCtx.stroke();
+                        overlayCtx.fillText(val, x + 2, startY + 10);
+                    });
+                    overlayCtx.restore();
+                }
+
                  // Label
                  overlayCtx.save();
                  overlayCtx.fillStyle = mon.color;
                  overlayCtx.font = `bold ${labelSize}px ${currentFontStack}`;
-                 
+
                  const labelX = (direction==='right') ? 20 : mainCanvas.width - 100;
                  overlayCtx.fillText(mon.label || `CC ${mon.cc}`, labelX, yOffset + 20);
                  overlayCtx.restore();
-                 
+
                  idx++;
             });
             targetCtx.restore();
@@ -2171,40 +2303,40 @@
             const y = mainCanvas.height - (n.note - startKey + 1) * keyH + thickOffset;
             const duration = performance.now() - n.start;
             const len = noteSpeed * (duration / 16.66);
-            
+
             mainCtx.save();
             if(glowEnabled && glowAmount > 0) {
                 mainCtx.shadowColor = (currentTheme === 'chernobyl') ? '#00FFFF' : n.color;
                 mainCtx.shadowBlur = glowAmount;
             }
             mainCtx.fillStyle = n.color;
-            
+
             let rx;
-            if (direction === 'right') { rx = 0; } 
+            if (direction === 'right') { rx = 0; }
             else { rx = mainCanvas.width - len; }
-            
+
             drawNoteShape(mainCtx, rx, y, len, Math.ceil(thickH), noteShape);
             mainCtx.restore();
-            
+
             if(showLabels && keyH > 15) {
                 const alreadyLabeled = labelPerBar && labeledPitches.has(n.note);
                 if(!alreadyLabeled) {
                     const targetCtx = freshLabels ? overlayCtx : mainCtx;
-                    targetCtx.save(); targetCtx.shadowBlur=0; 
+                    targetCtx.save(); targetCtx.shadowBlur=0;
                     targetCtx.fillStyle = (labelColorMode === 'match') ? n.color : '#fff';
                     targetCtx.font=`bold ${labelSize}px ${currentFontStack}`;
-                    
+
                     let lx;
                     if (direction === 'right') lx = len + 5;
                     else lx = (mainCanvas.width - len) - 15;
-    
+
                     targetCtx.fillText(CONFIG.NOTE_NAMES[n.note%12], lx, y + keyH/2 + 4);
                     targetCtx.restore();
                     if(labelPerBar) labeledPitches.add(n.note);
                 }
             }
         });
-        
+
         // GRID LANES
         if(showGrid) {
              const targetCtx = trailsOnGrid ? mainCtx : overlayCtx;
@@ -2212,7 +2344,7 @@
                 const y = mainCanvas.height - (i - startKey + 1) * keyH;
                 const h = Math.ceil(keyH);
                 const isBlack = CONFIG.BLACK_KEYS.includes(i%12);
-                
+
                 targetCtx.save(); targetCtx.shadowBlur=0;
                 targetCtx.fillStyle = isBlack ? 'rgba(255,255,255,0.03)' : 'transparent';
                 targetCtx.fillRect(0, y, mainCanvas.width, h);
