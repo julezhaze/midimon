@@ -8,7 +8,7 @@ def verify_changes():
         page = browser.new_page()
 
         # Load local HTML
-        file_path = os.path.abspath("Final18_Working.html")
+        file_path = os.path.abspath("MIDI_Monitor_Final18.html")
         page.goto(f"file://{file_path}")
 
         # 1. Open Settings
